@@ -1,0 +1,22 @@
+---
+title: "My Professional Website"
+---
+
+## <span style="color: blue; font-family: Arial, sans-serif; font-weight: bold; font-style: italic; font-size: 25px; text-decoration: underline;">About Me</span>
+
+::: {.grid}
+::: {.g-col-4}
+![](faceless.jpg){width=200px style="border-radius: 20px;"}
+:::
+::: {.g-col-8}
+
+### Add Name
+**Pronouns:** Add Pronouns  
+**Education:** University of College, B.S. Data Science  
+**Short Bio:** Add Bio about your background, interests, and expertise.
+:::
+:::
+
+## Experience 
+
+<embed src="Replace_with_your_own.pdf" type="application/pdf" width="100%" height="100px" />
