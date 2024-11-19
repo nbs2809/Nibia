@@ -1,0 +1,388 @@
+---
+title: "Biogeochemistry Project"
+echo: false
+freeze: auto
+execute: 
+    warning: false 
+    message: false
+---
+# Packages
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)  # Includes dplyr, ggplot2, and more
+library(viridis)
+library(patchwork)
+```
+
+# Data Set
+```{r}
+NutriCamp <- read.csv("~/Desktop/2023-2024/Summer 24'/Data /CSV TRACE Nibia and Deya incubations(Recuperado automáticamente).csv")
+head(NutriCamp)
+# NutriCamp <- read.csv("~/Desktop/2023-2024/Summer 24'/Data /NutriCampData_ONLY25_35.csv")
+# head(NutriCamp,10)
+```
+
+## Function to calculate mean and SEM
+
+```{r}
+calculate_summary <- function(data, stage) {
+  data %>%
+    filter(Stage == stage) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(
+      Extractable.C_mean = mean(Extractable.C..ug.C.g.soil., na.rm = TRUE),
+      Extractable.C_sem = sd(Extractable.C..ug.C.g.soil., na.rm = TRUE) / sqrt(n()),
+      
+      Extractable.N_mean = mean(Extractable.N..ug.N.g.soil., na.rm = TRUE),
+      Extractable.N_sem = sd(Extractable.N..ug.N.g.soil., na.rm = TRUE) / sqrt(n()),
+      
+      ubial.C_mean = mean(ubial.C..ug.C.g.soil., na.rm = TRUE),
+      ubial.C_sem = sd(ubial.C..ug.C.g.soil., na.rm = TRUE) / sqrt(n()),
+      
+      ubial.N_mean = mean(ubial.N..ug.N.g.soil., na.rm = TRUE),
+      ubial.N_sem = sd(ubial.N..ug.N.g.soil., na.rm = TRUE) / sqrt(n()),
+      
+      ubial.C.N_mean = mean(ubial.C.N, na.rm = TRUE),
+      ubial.C.N_sem = sd(ubial.C.N, na.rm = TRUE) / sqrt(n())
+    ) %>%
+    ungroup()
+}
+
+```
+
+## Summaries
+
+```{r}
+# Generate summaries for all stages (1 through 5)
+stages_summary <- lapply(1:5, function(stage) calculate_summary(NutriCamp, stage))
+names(stages_summary) <- paste0("stage", 1:5, "_summary")
+```
+
+## Plotting ALL Stages
+
+# GOOD Extractable C graph
+
+```{r}
+stage_plots <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(Extractable_C_mean = mean(Extractable.C..ug.C.g.soil., na.rm = TRUE),
+              Extractable_C_sd = sd(Extractable.C..ug.C.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(Extractable_C_sem = Extractable_C_sd / sqrt(3)) # SEM calculation
+
+  p <- ggplot(stage_data, aes(x = factor(WHC), y = Extractable_C_mean, fill = as.factor(Initial.Temperature))) +
+    geom_bar(stat = "identity", position = position_dodge(0.9), color = "black") + # Add black outline
+    geom_errorbar(aes(ymin = Extractable_C_mean - Extractable_C_sem, ymax = Extractable_C_mean + Extractable_C_sem),
+                  width = 0.2, position = position_dodge(0.9), color = "black") + # Adjust error bar width and color
+    labs(title = paste("Extractable C - Stage", stage_num),
+         x = "WHC", y = "Extractable C (ug C/g soil)") +
+    theme_classic() +
+    scale_fill_discrete(name = "Initial Temperature") +
+    theme(axis.title.x = element_text(face = "bold"), 
+          axis.title.y = element_text(face = "bold"),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
+
+  stage_plots[[paste0("Stage_", stage_num)]] <- p
+}
+
+# Print all the plots
+stage_plots
+```
+
+# Anova results Extractable C
+
+```{r}
+stage_plots <- list()
+anova_results <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(Extractable_C_mean = mean(Extractable.C..ug.C.g.soil., na.rm = TRUE),
+              Extractable_C_sd = sd(Extractable.C..ug.C.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(Extractable_C_sem = Extractable_C_sd / sqrt(3)) # SEM calculation
+
+  # Check if WHC and Initial.Temperature have at least two levels
+  if (n_distinct(stage_data$WHC) > 1 & n_distinct(stage_data$Initial.Temperature) > 1) {
+    anova_result <- aov(Extractable.C..ug.C.g.soil. ~ WHC * Initial.Temperature, data = NutriCamp %>% filter(Stage == stage_num))
+    anova_summary <- summary(anova_result)
+    anova_results[[paste0("Stage_", stage_num)]] <- anova_summary
+  } else {
+    anova_results[[paste0("Stage_", stage_num)]] <- "ANOVA not performed: Insufficient levels in WHC or Initial.Temperature."
+  }
+}
+
+# Display ANOVA results
+anova_results
+
+```
+
+# GOOD Extractable N 
+
+```{r}
+
+# 
+stage_plots <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(Extractable_N_mean = mean(Extractable.N..ug.N.g.soil., na.rm = TRUE),
+              Extractable_N_sd = sd(Extractable.N..ug.N.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(Extractable_N_sem = Extractable_N_sd / sqrt(3)) # SEM calculation
+
+  p <- ggplot(stage_data, aes(x = factor(WHC), y = Extractable_N_mean, fill = as.factor(Initial.Temperature))) +
+      coord_flip()+
+    geom_bar(stat = "identity", position = position_dodge(0.9), color = "black") + # Add black outline
+    geom_errorbar(aes(ymin = Extractable_N_mean - Extractable_N_sem, ymax = Extractable_N_mean + Extractable_N_sem),
+                  width = 0.2, position = position_dodge(0.9), color = "black") + # Adjust error bar width and color
+    labs(title = paste("Extractable N - Stage", stage_num),
+         x = "WHC", y = "Extractable N (ug C/g soil)") +
+    theme_classic() +
+    scale_fill_discrete(name = "Initial Temperature") +
+    theme(axis.title.x = element_text(face = "bold"), 
+          axis.title.y = element_text(face = "bold"),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
+
+  stage_plots[[paste0("Stage_", stage_num)]] <- p
+}
+
+# Print all the plots
+stage_plots
+
+```
+
+# Anova results Extractable N
+
+```{r}
+stage_plots <- list()
+anova_results <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(Extractable_N_mean = mean(Extractable.N..ug.N.g.soil., na.rm = TRUE),
+              Extractable_N_sd = sd(Extractable.N..ug.N.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(Extractable_N_sem = Extractable_N_sd / sqrt(3)) # SEM calculation
+
+  # Check if WHC and Initial.Temperature have at least two levels
+  if (n_distinct(stage_data$WHC) > 1 & n_distinct(stage_data$Initial.Temperature) > 1) {
+    anova_result <- aov(Extractable.N..ug.N.g.soil. ~ WHC * Initial.Temperature, data = NutriCamp %>% filter(Stage == stage_num))
+    anova_summary <- summary(anova_result)
+    anova_results[[paste0("Stage_", stage_num)]] <- anova_summary
+  } else {
+    anova_results[[paste0("Stage_", stage_num)]] <- "ANOVA not performed: Insufficient levels in WHC or Initial.Temperature."
+  }
+}
+
+# Display ANOVA results
+anova_results
+
+```
+
+# GOOD ubial C graph
+
+```{r}
+stage_plots <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(ubial_C_mean = mean(ubial.C..ug.C.g.soil., na.rm = TRUE),
+              ubial_C_sd = sd(ubial.C..ug.C.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(ubial_C_sem = ubial_C_sd / sqrt(3)) # SEM calculation
+
+  p <- ggplot(stage_data, aes(x = factor(WHC), y = ubial_C_mean, fill = as.factor(Initial.Temperature))) +
+    geom_bar(stat = "identity", position = position_dodge(0.9), color = "black") + # Add black outline
+    geom_errorbar(aes(ymin = ubial_C_mean - ubial_C_sem, ymax = ubial_C_mean + ubial_C_sem),
+                  width = 0.2, position = position_dodge(0.9), color = "black") + # Adjust error bar width and color
+    labs(title = paste("ubial C - Stage", stage_num),
+         x = "WHC", y = "ubial C (ug C/g soil)") +
+    theme_classic() +
+    scale_fill_discrete(name = "Initial Temperature") +
+    theme(axis.title.x = element_text(face = "bold"), 
+          axis.title.y = element_text(face = "bold"),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
+
+  stage_plots[[paste0("Stage_", stage_num)]] <- p
+}
+
+# Print all the plots
+stage_plots
+```
+
+# Anova results ubial C
+
+```{r}
+# List to store plots and ANOVA results for each stage
+stage_plots <- list()
+anova_results <- list()
+
+# Loop through each stage and generate the plot with ANOVA results
+for (stage_num in 1:5) {
+  # Filter and calculate summary stats for the current stage
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(ubial_C_mean = mean(ubial.C..ug.C.g.soil., na.rm = TRUE),
+              ubial_C_sd = sd(ubial.C..ug.C.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(ubial_C_sem = ubial_C_sd / sqrt(3)) # SEM calculation
+
+  # Check if WHC and Initial.Temperature have at least two levels
+  if (n_distinct(stage_data$WHC) > 1 & n_distinct(stage_data$Initial.Temperature) > 1) {
+    # Run ANOVA only if both variables have 2 or more levels
+    anova_result <- aov(ubial.C..ug.C.g.soil. ~ WHC * Initial.Temperature, data = NutriCamp %>% filter(Stage == stage_num))
+    anova_summary <- summary(anova_result)
+    anova_results[[paste0("Stage_", stage_num)]] <- anova_summary
+  } else {
+    # Store a message if ANOVA could not be run due to lack of levels
+    anova_results[[paste0("Stage_", stage_num)]] <- "ANOVA not performed: Insufficient levels in WHC or Initial.Temperature."
+  }
+}
+
+# Display ANOVA results
+anova_results
+```
+
+# GOOD ubial N graph
+
+```{r}
+stage_plots <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(ubial_N_mean = mean(ubial.N..ug.N.g.soil., na.rm = TRUE),
+              ubial_N_sd = sd(ubial.N..ug.N.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(ubial_N_sem = ubial_N_sd / sqrt(3)) # SEM calculation
+
+  p <- ggplot(stage_data, aes(x = factor(WHC), y = ubial_N_mean, fill = as.factor(Initial.Temperature))) +
+    geom_bar(stat = "identity", position = position_dodge(0.9), color = "black") + # Add black outline
+    geom_errorbar(aes(ymin = ubial_N_mean - ubial_N_sem, ymax = ubial_N_mean + ubial_N_sem),
+                  width = 0.2, position = position_dodge(0.9), color = "black") + # Adjust error bar width and color
+    labs(title = paste("ubial N - Stage", stage_num),
+         x = "WHC", y = "ubial N (ug C/g soil)") +
+    theme_classic() +
+    scale_fill_discrete(name = "Initial Temperature") +
+    theme(axis.title.x = element_text(face = "bold"), 
+          axis.title.y = element_text(face = "bold"),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
+
+  stage_plots[[paste0("Stage_", stage_num)]] <- p
+}
+
+# Print all the plots
+stage_plots
+```
+
+# Anova results ubial N
+
+```{r}
+# List to store plots and ANOVA results for each stage
+stage_plots <- list()
+anova_results <- list()
+
+# Loop through each stage and generate the plot with ANOVA results
+for (stage_num in 1:5) {
+  # Filter and calculate summary stats for the current stage
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(ubial_N_mean = mean(ubial.N..ug.N.g.soil., na.rm = TRUE),
+              ubial_N_sd = sd(ubial.N..ug.N.g.soil., na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(ubial_N_sem = ubial_N_sd / sqrt(3)) # SEM calculation
+
+  # Check if WHC and Initial.Temperature have at least two levels
+  if (n_distinct(stage_data$WHC) > 1 & n_distinct(stage_data$Initial.Temperature) > 1) {
+    # Run ANOVA only if both variables have 2 or more levels
+    anova_result <- aov(ubial.N..ug.N.g.soil. ~ WHC * Initial.Temperature, data = NutriCamp %>% filter(Stage == stage_num))
+    anova_summary <- summary(anova_result)
+    anova_results[[paste0("Stage_", stage_num)]] <- anova_summary
+  } else {
+    # Store a message if ANOVA could not be run due to lack of levels
+    anova_results[[paste0("Stage_", stage_num)]] <- "ANOVA not performed: Insufficient levels in WHC or Initial.Temperature."
+  }
+}
+
+# Display ANOVA results
+anova_results
+```
+
+# GOOD ubial C/N ratio graph
+
+```{r}
+stage_plots <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(ubial_CN_mean = mean(ubial.C.N, na.rm = TRUE),
+              ubial_CN_sd = sd(ubial.C.N, na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(ubial_CN_sem = ubial_CN_sd / sqrt(3)) # SEM calculation
+
+  p <- ggplot(stage_data, aes(x = factor(WHC), y = ubial_CN_mean, fill = as.factor(Initial.Temperature))) +
+    geom_bar(stat = "identity", position = position_dodge(0.9), color = "black") + # Add black outline
+    geom_errorbar(aes(ymin = ubial_CN_mean - ubial_CN_sem, ymax = ubial_CN_mean + ubial_CN_sem),
+                  width = 0.2, position = position_dodge(0.9), color = "black") + # Adjust error bar width and color
+    labs(title = paste("ubial C/N - Stage", stage_num),
+         x = "WHC", y = "ubial C/N (ug C/g soil)") +
+    theme_classic() +
+    scale_fill_discrete(name = "Initial Temperature") +
+    theme(axis.title.x = element_text(face = "bold"), 
+          axis.title.y = element_text(face = "bold"),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
+
+  stage_plots[[paste0("Stage_", stage_num)]] <- p
+}
+
+# Print all the plots
+stage_plots
+```
+
+# Anova results ubial C/N ratio
+
+```{r}
+# List to store plots and ANOVA results for each stage
+stage_plots <- list()
+anova_results <- list()
+
+for (stage_num in 1:5) {
+  stage_data <- NutriCamp %>%
+    filter(Stage == stage_num) %>%
+    group_by(WHC, Initial.Temperature) %>%
+    summarise(ubial_CN_mean = mean(ubial.C.N, na.rm = TRUE),
+              ubial_CN_sd = sd(ubial.C.N, na.rm = TRUE),
+              .groups = "drop") %>%
+    mutate(ubial_CN_sem = ubial_CN_sd / sqrt(3)) # SEM calculation
+
+  # Check if WHC and Initial.Temperature have at least two levels
+  if (n_distinct(stage_data$WHC) > 1 & n_distinct(stage_data$Initial.Temperature) > 1) {
+    anova_result <- aov(ubial.C.N ~ WHC * Initial.Temperature, data = NutriCamp %>% filter(Stage == stage_num))
+    anova_summary <- summary(anova_result)
+    anova_results[[paste0("Stage_", stage_num)]] <- anova_summary
+  } else {
+    anova_results[[paste0("Stage_", stage_num)]] <- "ANOVA not performed: Insufficient levels in WHC or Initial.Temperature."
+  }
+}
+
+# Display ANOVA results
+anova_results
+```
