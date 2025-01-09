@@ -33,6 +33,7 @@ head(NutriCamp, 3)
 I used the same code below to produce all the graphs in this section:
 
 In this graph I also tried using the R package viridis - magma
+
 ```{r}
 stage_plots <- list()  #empty list for storing the plots
 
@@ -368,7 +369,7 @@ anova_results
 ## Table: Individual ANOVA summary
 
 | Stage | Variable | WHC (p-value) | Initial Temperature (p-value) | Interaction (p-value) |
-|---------------|---------------|---------------|---------------|---------------|
+|----|----|----|----|----|
 | **3** | Extractable C | 3.66e-07 \*\*\* | 0.861 | 0.182 |
 | **4** | Extractable C | 1.79e-07 \*\*\* | 0.655 | 0.454 |
 | **5** | Extractable C | 0.000431 \*\*\* | 0.000566 \*\*\* | 0.280 |
@@ -421,7 +422,7 @@ plot_path <- function(data, title) {
     scale_color_viridis_d(option = "plasma", name = "WHC (%)") +
     labs(
       title = title,
-      x = "Stage", y = "Ubial N (ug N/g soil)",
+      x = "Stage", y = "Extractable C (ug C /g soil)",
       linetype = "Initial Temperature", shape = "Initial Temperature"
     ) +
     theme_classic() +
@@ -717,7 +718,7 @@ for (result in anova_results) {
 ## Table: ANOVA Results for Extractable C, N, Ubial C, and Ubial N across Different Stages
 
 | Variable | Stage Comparison | Factor | F Value | p-value | Significance |
-|------------|------------|------------|------------|------------|------------|
+|----|----|----|----|----|----|
 | **Extractable C (ug C/g soil)** | Stage 3 vs Stage 4 | WHC | 4.326 | 0.0223 | \* |
 |  | Stage 3 vs Stage 5 | WHC | 12.100 | 0.00014 | \*\*\* |
 | **Extractable N (ug N/g soil)** | Stage 1 vs Stage 2 | WHC | 43.14 | 4.98e-06 | \*\*\* |

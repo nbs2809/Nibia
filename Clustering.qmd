@@ -1,0 +1,262 @@
+---
+title: "Clustering"
+author: "Ghaicha Aboubacar Ahe,Michelle Osiro, Rana Rishmawi, Nibia Becerra Santillan, Tenzin Dayoe"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r, echo=FALSE, message = FALSE}
+palette("Okabe-Ito")
+scale_colour_discrete <- function(...) scale_colour_manual(values = palette())
+scale_fill_discrete   <- function(...) scale_fill_manual(values = palette())
+
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 2.75, 
+  fig.width = 4.25,
+  fig.env='figure',
+  fig.pos = 'h',
+  fig.align = 'center')
+```
+
+```{r, echo=FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidymodels)
+library(tidytext)
+library(factoextra)
+library(rattle)
+library(VIM)
+library(knitr)
+set.seed(253)
+```
+
+# Beatles Music Analysis - Beats & Hits
+
+![](https://wallpapers.com/images/hd/the-beatles-rock-band-hd-pwxlwnzxmdm3k46a.jpg)
+
+# Data import and cleaning
+
+```{r}
+music <- read.csv("https://ajohns24.github.io/data/billboard.csv")
+
+my_artist <- music %>%
+filter(performer == "The Beatles") %>%
+select(-performer) %>%
+group_by(song) %>% # The last rows deal w songs that appear more than once
+slice_sample(n = 1)%>%
+ungroup()
+
+my_artist <- my_artist%>%
+  select(-c(time_signature))
+
+my_artist<- my_artist %>% 
+  column_to_rownames("song")
+```
+
+# Clustering analysis 
+
+We used hierarchical clustering to generate a dendrogram of the processed beetles dataset using the 14 features. By analyzing the Dendrogram, it seemed like choosing 6 clusters seemed to be the ideal clustering choice.
+
+We also generated a heap map of the scaled dataset to capture the differences and patterns of features in between the difference clusters. Through analysis, we identified some features for which the clusters seemed to have unique values. For example, in the heatmap below, the largest cluster in the middle seems to have a very different mode value than the cluster immediately below it and also above it. But in general the different clusters doesn't seem to have very unique identifying values, this could be because most songs of beetles are similar in terms of loudness, speechiness and even spotify popularity.
+
+We created a grid plot of "average feature value" vs the "cluster label" for each of the 14 features. One of the interesting cluster was the singular cluster with the song "Rain". For the singular cluster consisting of "Rain" (i.e cluster 5), the clustering algorithm separated it from the rest in the beginning because it has some very distinct features. The song rain has a danceability level of 0 while all the other clusters have it at 1, has the highest level of instrumentalness and liveliness. These unique characteristics might have caused this to be the first split.
+
+Generally, all the clusters seem to have different average values of features seen strongly in features such as "bill board weeks", "loudness" etc. But for features such as popularity and speechiness, the clustering didn't do a great differentiation between the different clusters. The reason could be that almost all of the songs of the Beatles are quite popular on spotify and catching the subtle differences in popularity would require a lot more clusters.Moreover we had to remove certain features such as "time signature" due to zero variance in it. This highlights the a good level of similarity in Beatles songs when it comes to certain musical features.
+
+Since one of the drawbacks of hierarchical clustering is that the choice of k+1 cluster is based on the best k clusters, the 6 clusters that were identified might not be the best 6 clusters, and due to it could be possible that there is a better clustering possible for identifying 6 clusters. Also the fact that one cluster was huge while the others had only few songs, highlights that the need to explore more advanced clustering algorithms.
+
+## Code and plots
+
+```{r fig.height = 10, fig.width=15}
+#Heat map 
+set.seed(253)
+heatmap(scale(my_artist), Colv = NA, cexRow = 0.3)
+```
+
+```{r fig.height = 10, fig.width=15}
+
+beatles_cluster <- hclust(dist(scale(my_artist)), method = "complete")
+
+# Dendrogram
+fviz_dend(
+  beatles_cluster,
+  k = 6,
+  cex = 0.7,
+  k_colors = "jco",
+  rect = TRUE,
+  rect_fill = TRUE,
+  rect_border = "jco",
+  labels_track_height = 0.8,
+  main = "Hierarchical Clustering Dendrogram (6 Clusters)",
+  xlab = "Songs",
+  ylab = "Height",
+  ggtheme = theme_minimal()
+)
+
+```
+
+```{r fig.height = 10, fig.width=15}
+
+cluster_data <- my_artist %>% 
+  mutate(hier_cluster_k = as.factor(cutree(beatles_cluster, k = 6)))
+
+groupLabelling<- cluster_data %>%
+  group_by(hier_cluster_k)%>%
+  count()
+
+result <- cluster_data %>%
+  group_by(hier_cluster_k) %>%
+  summarize_all(mean)
+
+long_result <- result %>%
+  pivot_longer(cols = -hier_cluster_k, names_to = "variable", values_to = "value")
+
+#Grid Plot 
+
+ggplot(long_result, aes(x = hier_cluster_k, y = value)) +
+  geom_point(size = 3, alpha = 0.7, color = "steelblue") +  # Adjust size and transparency
+  facet_wrap(~variable, scales = "free_y", ncol = 3) +      # Arrange facets in 3 columns
+  labs(
+    title = "Cluster Metrics Across Different Hierarchical Cluster Numbers",
+    subtitle = "Each panel represents a metric; points show metric values for each cluster count",
+    x = "Number of Clusters (k)",
+    y = "Metric Value"
+  ) +
+  theme_minimal(base_size = 14) +                           # Clean theme with larger font size
+  theme(
+    strip.text = element_text(face = "bold"),               # Bold facet titles
+    axis.text.x = element_text(angle = 45, hjust = 1)     # Rotate x-axis labels            
+  )
+
+
+```
+
+```{r}
+#mean and count information 
+kable(groupLabelling)
+kable(result)
+```
+
+\
+
+# Dimension reduction analysis
+
+## Write-up
+
+From the UWC Event playlist :
+
+![](https://raw.githubusercontent.com/TenDayoe/file/main/image.jpg)
+
+For PC1, the strongest positively correlated features are energy, valence and loudness. These are negatively correlated with duration_ms. Given the definitions of these features: Energy - represents a perceptual measure of intensity and activity Valence - describes the musical positiveness conveyed by a track. Loudness - The overall loudness of a track in decibels (dB). Duration_ms - The duration of the track in milliseconds. It makes sense that loud, high energy and positive music would fall into a similar category. Based on PC1, these songs are likely to be on the shorter side.
+
+For PC2, danceability and acousticness have the strongest positive correlation, even though they are negatively correlated with the other features. Danceability is how “suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity”. There is a wide range of genres that are categorized as commonly danceable. On the other hand, acousticness is defined as “A confidence measure from 0.0 to 1.0 of whether the track is acoustic'', which could be broken down further into “(of popular music or musical instruments) not having electrical amplification”. Therefore, it refers mostly to songs commonly associated with ballads, or slow. Initially, using these two definitions, we observed that the genre they fall in are vastly different and therefore we would not have predicted that they would be correlated. However, after talking as a team we realized that ballads (for example, Ed Sheeran songs) are usually used in spaces like weddings, and they may be more commonly danced to in western societies. From here we reflected that our contexts strongly impact what we understand as danceable or acoustic. In order to evaluate this, we explored the developer site from Spotify (https://developer.spotify.com/documentation/web-api/reference/get-audio-features), where they described how the values of these features are produced using human-trained algorithms. Coming back to our point about context and bias informing our understanding of these features, these values are highly subjective and make it really hard to have reliable predictions of how a song may sound or its characteristics.
+
+If we wanted to retain at least 80% of the information in the original features of our dataset, we would need to keep around 8 PCs. Based on the graphs of cumulative percentage variance explained by our model, they begin to plateau at around this cut off which justifies this value. Because the songs from The Beatles are very similar across the board, more PCs (8) are needed to keep most of the variation.
+
+Definition of audio features: https://developer.spotify.com/documentation/web-api/reference/get-audio-features
+
+## Code and plots
+
+```{r}
+#PCA training
+pca_my_artist <- prcomp(my_artist, scale = TRUE, center = TRUE)
+
+kable(pca_my_artist %>% 
+  pluck("rotation")%>%
+  head(3))
+```
+
+This creates 3 PCs which are each different *combinations* of the (standardized) original features:
+
+```{r fig.height = 10, fig.width=15}
+# Plot loadings for first "k" PCs (you pick k)
+library(reshape2)
+library(ggplot2)
+library(viridis)
+library(dplyr)
+
+# Melt and enhance the first plot
+melt(pca_my_artist$rotation[, 1:3]) %>%
+  mutate(Var1 = factor(Var1, levels = unique(Var1))) %>%  # Ensure consistent ordering
+  ggplot(aes(x = reorder_within(Var1, abs(value), Var2), y = value, fill = Var1)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ Var2, scales = "free_x", nrow = 1) +  # Free x-axis for clarity
+  labs(
+    y = "Loadings",
+    x = "Original Features (Sorted by Loading)",
+    fill = "Original Features",
+    title = "PCA Loadings Across Principal Components"
+  ) +
+  scale_fill_viridis_d(option = "C", end = 0.85) +  # Viridis palette
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    panel.grid.major.x = element_blank()
+  )
+
+
+melt(pca_my_artist$rotation) %>%
+  filter(Var2 == "PC1") %>%
+  arrange(desc(abs(value))) %>%  # Sort by absolute loading values
+  ggplot(aes(x = reorder(Var1, value), y = value, fill = Var1)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  labs(
+    y = "Loadings",
+    x = "Original Features (Sorted by Loading)",
+    fill = "Original Features",
+    title = "PCA Loadings for the First Principal Component (PC1)"
+  ) +
+  scale_fill_viridis_d(option = "D", end = 0.85) +  # Different palette for variation
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    panel.grid.major.x = element_blank()
+  )
+
+# Loadings plot for first 2 PCs
+library(factoextra)
+fviz_pca_var(pca_my_artist, repel = TRUE)
+```
+
+```{r fig.height = 10, fig.width=15}
+# Numerical summaries: Measure information captured by each PC
+kable(pca_my_artist %>% 
+  tidy(matrix = "eigenvalues"))
+
+# Graphical summary 1: SCREE PLOT
+# Plot % of variance explained by each PC
+pca_my_artist %>% 
+  tidy(matrix = "eigenvalues") %>% 
+  ggplot(aes(y = percent, x = PC)) + 
+    geom_point(size = 2) + 
+    geom_line() + 
+    labs(y = "% of variance explained")
+
+# Graphical summary 2: Plot cumulative % of variance explained by each PC
+pca_my_artist %>% 
+  tidy(matrix = "eigenvalues") %>% 
+  rbind(0) %>% 
+  ggplot(aes(y = cumulative, x = PC)) + 
+    geom_point(size = 2) + 
+    geom_line() + 
+    labs(y = "CUMULATIVE % of variance explained")
+```
+
+```{r}
+# Numerical summary: check out the scores
+kable(pca_my_artist %>% 
+  pluck("x")%>%
+  head(3))
+  
+```
+
+```{r fig.height = 10, fig.width=15}
+# Graphical summary: Score plot
+# Plot PC1 scores (x-axis) vs PC2 scores (y-axis) of all data points
+fviz_pca_ind(pca_my_artist, repel = TRUE)
+```

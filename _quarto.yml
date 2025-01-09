@@ -8,18 +8,19 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - text: Ecology Research
+      - text: Ecology Research 
         menu:
-          - text: Biogeochemistry
-            href: Biogeochemistry.qmd
-          - text: Environmental Justice
-            href: other_highlights.qmd
-      - text: Data Science
+          - text: Honors Preliminary Visualizations
+            href: Dec1st_Visualization_ANOVA.qmd
+      - text: Data Science Projects
         menu:
-          - text: Synthetic Control
-            href: data_visualizations.qmd
-          - text: LDA
-            href: other_highlights.qmd
+          - text: Difference in Difference
+            href: DiD_ColombiaVenezuela.qmd
+          - text: LDA thematic analysis
+            href: LDA_thematic_analysis/Report.qmd
+          - text: Clustering
+            href: Clustering.qmd
+                
     right:
       - icon: envelope
         href: "mailto:nbecerra@macalester.edu"

@@ -1,0 +1,246 @@
+---
+title: "Venezuela-Colombia Relations through the News: A Topic Modeling Analysis"
+author: "Maria Sanchez Linares, Nibia Becerra Santillan, Emanuel Deleon Otazu"
+format: html
+---
+
+# Presentation slides
+
+<embed src="LDA_presentation.pdf" type="application/pdf" width="100%" height="450px" />
+
+
+# Integrated Report
+```{r, echo=FALSE, message = FALSE}
+library(plotly)
+library(knitr)
+library(rmarkdown)
+
+```
+
+```{r source_rmd, include=FALSE, echo=FALSE}
+#source script with useful functions and graphs 
+file.exists("~/Desktop/Nibia/LDA_thematic_analysis/Dynamic_Topic_Modeling_Spanish.R")
+file_path <- normalizePath("~/Desktop/Nibia/LDA_thematic_analysis/Dynamic_Topic_Modeling_Spanish.R")
+print(file_path)
+
+source(file_path)
+```
+
+# Introduction
+
+This project is inspired by the intricate historical and ongoing dynamics of Venezuela-Colombia relations, particularly in the context of migration, political tensions, and economic challenges.This relationship has been shaped by significant historical events that have deeply influenced migration patterns, political tensions, and economic ties. To better illustrate this, we draw a broad timeline to highlight some of the main events:
+
+![*Figure 1: Timeline of Events*](timeline.png){width="700"}
+
+This dynamic history of migration, political conflict, and economic instability inspired our project, which aims to examine how these factors, and more specifically migration, continue to shape the relationship between the two countries.
+
+By focusing on a large corpus of news articles from Colombian newspapers like El Tiempo and El Espectador, the project seeks to computationally analyze how these factors have manifested in media narratives over time. The use of topic modeling, specifically Latent Dirichlet Allocation (LDA), will allow us to identify and track the key themes that have shaped the discourse around Venezuela and Colombia, providing insights into how political events, economic crises, and migration trends have influenced public perception and bilateral relations. Through this analysis, the project aims to uncover the evolving nature of their relationship and explore the role of media in framing these complex dynamics.
+
+**Research Question:**
+
+*What are the main themes discussed in Colombian newspapers about Venezuela-Colombia relations and how do they change in response to significant historical/political events?*
+
+**Data Source:**
+
+The data for this analysis consists **5,061 news articles** published by Colombian newspapers **El Tiempo** and **El Espectador**. El Tiempo is currently the most widely read newspaper in Colombia and has historically been right-leaning, while El Espectador, the country's oldest newspaper, is known for its left-leaning stance.
+
+We downloaded these articles from the **Nexus Uni** database under the keyword *"Venezuela"*, filtering for all articles published in years 2017, 2020 and 2023.
+
+## Methodolody
+
+### Data Collection and Pre-processing
+
+1.  **Data Extraction:** Articles were extracted from PDF files using `pdftools` and other relevant libraries to create a text extraction function.
+2.  **Text Cleaning:** Text was cleaned by removing stop words, punctuation, and special characters.
+3.  **Tokenization:** Text was *tokenized* into individual words.
+4.  **Lemmatization:** Words were *lemmatized* to their root forms using a Spanish lemmatizer.
+5.  **TF-IDF:** To reduce noise from frequently occurring words that do not convey important information, we applied the TF-IDF statistic, which adjusts word importance by down-weighting common terms and emphasizing less frequent but significant ones. Thus,words with a TF-IDF score below 0.01 were removed from the corpus to improve topic coherence.
+
+### Topic Modeling
+
+1.  **Document-Term Matrix (DTM):** A Document-Term Matrix (DTM) was created to represent the occurrence of words in each document. The DTM is a matrix where rows represent documents and columns represent unique words from the corpus.
+
+2.  **Optimal Number of Topics:** We used model fitness scores to validate the optimal number of topics for LDA. Specifically, the `FindTopicNumber()` function from the `ldatuning` package was applied. Using a DTM, this function allows for the input of multiple values for the number of topics (k) and calculates four different model fitness scores simultaneously: *Griffiths2004, Deveaud2014, CaoJuan2009, and Arun2010.* The use of multiple fitness scores provided a comprehensive approach to determining the optimal number of topics for the LDA model.
+
+-   Griffiths2004: Aims to identify coherence.
+
+-   Deveaud2014: Reflects interpretability.
+
+-   CaoJuan2009: Measures distinctiveness.
+
+-   Arun2010: Analyzes topic separation.
+
+![*Figure 2: Line Graphs Showing Four Model Fitness Scores of k Topics*](general fitness scores copy.png){width="500"}
+
+Based on the fitness score analysis we decided on 6 topic as the optimal parameter our LDA model.
+
+3.  **LDA Model:** Latent Dirichlet Allocation (LDA) is a probabilistic model that uncovers hidden topics within a corpus by analyzing patterns of word co-occurrence.
+
+    -   **Bayesian Inference:**\
+        LDA employs Bayesian statistics to infer the hidden structure of the text. It estimates the probability distributions of topics and words based on the observed documents.
+
+    -   **Generative Model:**\
+        LDA assumes that:
+
+        -   Each document is a mixture of multiple topics.\
+        -   Each topic is represented as a probability distribution over a set of words.\
+            Using Bayesian inference, LDA works backward from the observed words to:\
+        -   Identify the most probable topics for each document.\
+        -   Determine the most representative words for each topic.
+
+4.  **Article Classification:**Each newspaper article was categorized based on its topic-document affiliation, determined by Gamma Values derived from the LDA model.
+
+    -   **Gamma Value:**\
+        Gamma values represent the degree of association between a document and each topic. See the sample distribution of gamma values below:
+
+        ![Figure 3: Gamma Values Distribution and Average Threshold](gamma_values.png){width="500"}
+
+    -   **Assignment Criteria:**
+
+        -   Each document was assigned to the topic with the highest gamma value.\
+        -   To ensure data quality and relevance, documents with ambiguous affiliations (i.e., gamma values below the average threshold) were excluded from the analysis.
+
+5.  **Topic Interpretation and Refinement:** After identifying the latent topics, in consultation with Prof. Busse-Cárdenas, additional analysis was performed to ensure that meaningful themes emerged from the model. The identified topics were interpreted by examining the 20 most frequent words associated with each topic in addition to the top 10 most relevant articles headlines for each topic.
+
+6.  **Time-Series Analysis:** To observe how the prominence of different topics evolved over time, a time-series analysis was conducted. This involved tracking the load of topics across different time periods, based on the frequency with which words associated with each topic appeared in the articles. Each document was assigned to the topic with the highest probability *gamma value* and the number and percentage of articles corresponding to each topic were tracked annually. This approach, similar to methods used by Roh and Yang (2019), helped identify shifts in public discourse and main traditional media channels representation over time, especially in relation to key political, economic, and migration-related events.
+
+7.  **Inter-Topic Analysis:** After identifying a number of topics from the entire corpus, we selected the topic that we identified as *migration* and replicated the methodology described above to dive into more specific areas withing this theme.
+
+## Results and Discussion
+
+**Topic Identification and Interpretation:**
+
+-   **Top Terms and Themes:**
+
+    The following table shows the finalized list of topic names and some examples of words that belong to each specific topic.
+
+```{r, echo=FALSE}
+kable(keywords, caption = "Top 5 Words per Topic", align = "c", format = "html")
+```
+
+-   **Inter-Topic Distance:** The relationships between topics were visualized using an inter-topic distance map.
+
+![Figure 4: Inter-Topic Distance Map](topic_distance_map.png){height=500}
+
+In the previous plot, we established the lambda value to be in a 0.5, as it provides the best balance between word frequency in the overall corpus, and it's relevance in the selected topic. However, the toggle is useful to explore the two ends of relevance per given topic.
+
+The amount of topics, and the seed used in this LDA model showed no overlap between any of our topics. The topics with the largest percentage of marginal topic distribution are 1 (Colombia-Venezuela Diplomacy) and 2 (Environmental Degradation). Conversely, Topic 6 (Venezuela Politics) has the smallest distribution. In other iterations of LDA's for our data, we observed that topics overlapped more often when they had a larger marginal topic distributions.
+
+**Document-Level Analysis:**
+
+-   **Top Representative Documents:**
+
+    The following table shows the 5 most representative documents for each topic that were identified and analyzed to provide context to our topic naming process.
+
+```{r, echo=FALSE}
+kable(titles, caption = "Top 5 Articles per Topic", align = "c", format = "html")
+```
+
+**Topic Breakdown:**
+
+-   **Colombia-Venezuela Diplomacy:**
+This topic focuses on articles discussing international conference agreements concerning Venezuela, meetings between Colombia's president, Gustavo Petro, and the opposition group of the current Chavista regime, *Plataforma Unitaria Democrática de Venezuela*. It also includes coverage of the controversy surrounding a comment made by the former Colombian ambassador to Venezuela, which influenced public opinion on a Colombian health reform.
+
+    Notably, all top articles for this topic are from 2023, closely tied to the *Cumbre sobre Venezuela en Bogotá* (Venezuela Summit) that took place this year. The summit highlighted Petro's widely reported stance on Venezuela, in which he attributes the country’s challenges to U.S. sanctions ([Rojas Silva, 2024](https://latinoamerica21.com/en/the-progressive-paradox-petros-regressive-measures-against-venezuelan-migration/)).
+
+-   **Environmental Degradation:**
+The most relevant articles in this topic focus on environmental relief strategies for the Amazon region, involving Brazil, Colombia, Ecuador, Peru, and Venezuela, in response to climate change. These strategies include initiatives such as transitioning to natural gas and making carbon markets more appealing to companies. Articles also highlight biodiversity loss caused by deforestation. One notable article raises concerns about Colombian businesses and their relationships with Venezuela, connecting the broader theme of environmental devastation to the role of companies in these processes. These articles are united by their focus on the environmental challenges and the influence of economic actors in addressing or exacerbating these issues.
+
+-   **Guerrilla:**
+The top articles in this topic center on ongoing legal cases involving Colombian politicians. A primary focus is the *Caso Uribe*, where former Colombian president Álvaro Uribe is accused of alleged ties to right-wing paramilitary and narcotrafficking groups, with key developments occurring in 2023 as the prosecutor's office formally accused him. The topic connects to Venezuela through Uribe’s lawyer, who is also under investigation and linked to a former Colombian ambassador in Venezuela. Additionally, the topic includes articles about Aida Merlano, a Colombian politician convicted in 2019 for conspiracy, weapons possession, and electoral crimes ([BBC News Mundo, 2019](https://www.bbc.com/mundo/noticias-america-latina-49906275)). Collectively, these articles connect through their focus on legal proceedings involving politicians with alleged links to guerrilla and criminal groups.
+
+-   **Migration:**
+The most relevant articles in this topic address the challenges faced by Venezuelan immigrants. Some articles highlight their vulnerability during the COVID-19 pandemic and Colombian cities' responses to the large immigration wave at that time. Others focus on the dangers Venezuelan migrants face crossing one of the most perilous routes on their way to North America, particularly the United States ([Roy, D, 2024](https://www.cfr.org/article/crossing-darien-gap-migrants-risk-death-journey-us)). Additionally, one article advocates for Colombia to recognize Venezuelan immigrants as refugees to ensure their rights are protected. Another article discusses the 2023 policy changes in the U.S. after the removal of *Title 42*, which previously allowed border authorities to turn away migrants under COVID-19 health restrictions. The new policy prevents asylum seekers from applying if they did not first seek protection in transit countries or apply online ([Long, C, 2023](https://apnews.com/article/immigration-biden-border-title-42-mexico-asylum-be4e0b15b27adb9bede87b9bbefb798d)). These articles are connected through their examination of the challenges Venezuelan immigrants face due to shifting policies in Colombia and the United States.
+
+-   **Soccer:**
+The articles in this topic report on soccer matches, players, and regional and international competitions. These articles are connected by their focus on major events and news related to soccer as a sport.
+
+-   **Venezuela Politics:**
+The most relevant articles in this topic cover significant events in Venezuela’s political landscape. One article highlights the conflict between Portugal and Venezuela’s president Maduro, following an attack on a Portuguese cruise ship by the Venezuelan navy. Other top articles focus on Alex Saab, a Venezuelan politician accused of business deals worth an estimated **\$135 million** with the Venezuelan government ([Redacción Judicial, 2019](https://www.elespectador.com/judicial/justicia-de-ee-uu-acusa-a-empresario-alex-saab-de-lavado-de-dinero-article-872825/)). Coverage intensified in 2023 when Saab was released as part of a prisoner exchange with the U.S. These articles are connected through their coverage of key political events in Venezuela, showcasing both internal controversies and international conflicts.
+
+**Topic Evolution Over Time:**
+
+-   **Topic Distribution:**
+
+    The following graph shows the distribution of topics across different years. It allows to identify trends and shifts over time.
+
+```{r, echo=FALSE}
+
+# plotly(topic_dist)
+topic_dist
+```
+
+# Inter-Topic Modeling: Migration
+
+Based on the results of our initial LDA model, we chose to focus on the **Migration** topic to analyze more specifically how Venezuelan migration is discussed in Colombian newspapers.
+
+**Sub-topic Identification and Interpretation:**
+
+-   **Top Terms and Themes:**
+
+    The following table shows the finalized list of topic names and some examples of words that belong to each specific sub-topic.
+
+```{r, echo=FALSE}
+
+kable(migration_keywords, caption = "Top 5 Words per Migration Topic", align = "c", format = "html")
+
+```
+
+-   **Representative Documents:**
+
+    The following table shows the 5 most representative documents for each topic that were identified and analyzed to provide context to our topic naming process.
+
+```{r, echo=FALSE}
+
+kable(migration_titles, caption = "Top 5 Articles per Migratoin Topic", align = "c", format = "html")
+
+```
+**Topic Breakdown:**
+
+-   **COVID-19:**
+The most relevant articles highlight the heightened vulnerability and additional challenges faced by Venezuelan immigrants during the pandemic.
+
+-   **Colombia-Venezuela Border Security:**
+The most relevant articles focus on the deaths of Venezuelan immigrants during migration, particularly near Colombia. Two articles also cover related cases in the United States, expanding the scope of border-related issues.
+
+-   **Darién Migration Route: **
+The most relevant articles address the significant risks Venezuelan immigrants face while crossing the Darién Gap. Additionally, they explore how surrounding Colombian communities are economically benefiting from the needs of these migrants.
+
+-   **Gaza: **
+Although the coverage does not mention Venezuelan immigrants directly, it focuses on the displacement of Gaza’s population due to Israeli attacks. The connection to Venezuelan migration lies in the shared theme of vulnerability during forced movement and displacement.
+
+-   **Health: **
+The most relevant articles focus on how Venezuelan immigrants are impacted within the health sector, particularly in urban areas like Bogotá. Coverage includes the effects of issues such as contaminated air on migrants and the challenges faced by Venezuelan doctors whose work permits were not being accepted.
+
+-   **Migrant Human Trafficking: **
+The most relevant articles highlight cases of human trafficking along the border, as well as violence directed toward women. These articles are connected by the recurring theme of women being the primary victims of such exploitation.
+
+-   **Venezuela Migration Crisis: **
+The most relevant articles discuss the growing number of Venezuelan immigrants and their significant impact on Colombia, emphasizing the scale and consequences of the migration crisis.
+
+-   **Venezuela Migrants-US: **
+The most relevant articles covered how the change in Title 42 has impacted Colombia as the first country of transit for Venezuelan immigrants seeking asylum for the U.S.
+
+**Topic Evolution Over Time:**
+
+-   **Topic Distribution:**
+
+```{r, echo=FALSE}
+
+# plotly(migration_topic_dist)
+migration_topic_dist
+```
+
+## Conclusion
+
+Our analysis revealed key themes that deepen the understanding of Venezuelan migration in Colombian media. A central finding is the recurring narrative of vulnerability faced by migrants—whether through the risks of crossing the Darien Gap, struggles during the COVID-19 pandemic, or exploitation in human trafficking cases. Policies, such as the U.S. removal of Title 42, further complicated their journey, positioning Colombia as a critical transit country.
+
+Having Gaza as a subtopic was a surprising insight. While unrelated to Venezuelan migration, the coverage of forced displacement in Gaza highlighted a global pattern of vulnerability during movement. This parallel broadens the scope of our findings and situates Venezuelan migration within a larger context.
+
+Locally, Colombian communities seemed to play a mixed role— topics like Venezuelan Migration Crisis described ways in which Colombians would be impacted by the immigrants, while the topic of Darien Migration route revelead that others benefiting economically, especially in border areas. Challenges within institutions, like issues for Venezuelan doctors in the health sector, reveal the structural struggles migrants face in Colombia.
+
+Finally, the sharp increase in coverage in 2023 reflects migration’s growing importance in Colombian media. Topics such as Migration, Diplomacy, and Guerrilla gained prominence, illustrating shifting political and social priorities. By applying LDA iteratively, we uncovered both broad themes and nuanced subtopics, demonstrating the value of focused modeling in revealing the complexities of migration narratives and their global connections. Additionally, we also understood the importance of pairing this style of modelling with a strong method for determining the topic names and capture the nuances of the ways how different articles connect.
+
+## Presentation slides
+
+<embed src="LDA_presentation.pdf" type="application/pdf" width="100%" height="450px" />

@@ -1,0 +1,526 @@
+---
+title: "The Role of De-Venezuelization in Shaping Public Sentiment in Colombia: Difference in Difference analysis"
+author: "James Hernández, and Nibia Becerra Santillan"
+format: html
+---
+
+
+# Presentation slides
+
+<embed src="did_presentation.pdf" type="application/pdf" width="100%" height="450px" />
+
+# Written report
+
+<embed src="did_report.pdf" type="application/pdf" width="100%" height="1000px" />
+
+# R Workflow
+
+## Data Preparation
+
+### Loading packages
+
+```{r, echo=FALSE, message = FALSE}
+library(ggplot2)
+library(tidyverse)
+library(haven)
+library(dplyr)
+library(plotly)
+```
+```{r source_rmd, include=FALSE, echo=FALSE}
+#source script with useful functions and graphs 
+file.exists("~/Desktop/Nibia/DiD/pt1.R")
+file_path <- normalizePath("~/Desktop/Nibia/DiD/pt1.R")
+print(file_path)
+
+source(file_path)
+```
+
+## Loading Latinobarometro Data
+
+\
+\
+### Loading 2020 and 2023 .rdata datasets
+
+```{r}
+load("~/Desktop/Nibia/DiD/data/Latinobarometro_2020_Eng_Rdata_v1_0.rdata")
+
+load("~/Desktop/Nibia/DiD/data/Latinobarometro_2023_Eng_Rdata_v1_0.rdata")
+
+```
+
+### Loading 2018 .dta data set
+
+```{r}
+LB2018 <- read_dta("~/Desktop/Nibia/DiD/data/Latinobarometro_2018_Esp_Stata_v20190303.dta")
+
+```
+
+## Select Varibles of interest
+```{r}
+LB2018 <- LB2018 %>% 
+  select("NUMINVES", "IDENPA", "REG", "CIUDAD", "TAMCIUD", 
+  "EDAD", "SEXO", "S1", "S16", "S26", "S10", "P42NC", "P20STGBSC", "P22ST")
+LB2020 <- Latinobarometro_2020_Eng %>%
+  select("numinves", "idenpa", "reg", "ciudad", "tamciud", 
+  "edad", "sexo", "s1", "s21", "s30", "s16", "p38n", "p17stgbs", "p18st") 
+LB2023 <- Latinobarometro_2023_Eng_v1_0 %>%
+  select("numinves", "idenpa", "reg", "ciudad", "tamciud", 
+  "edad", "sexo", "S2", "S16", "S24", "S21B", "P32INN", "P15STGBS", "P16ST")
+```
+
+#### Check the columns
+
+```{r}
+# Check column names in each dataset
+colnames(LB2018)  # Inspect column names in LB2018
+colnames(LB2020)  # Inspect column names in LB2020
+colnames(LB2023)  # Inspect column names in LB2023
+
+```
+
+### Change variable names
+
+```{r}
+colnames(LB2018) <- c( "survey_year", "country", "reg", "city", "city_size", "age", 
+                "sex", "socialclass_selfAssesment","citizen", 
+                "socialclass_interviewerAssesment", "educ","opinion_immigrants", "presi_leading", "left_right")
+
+colnames(LB2020) <- c("survey_year", "country", "reg", "city", "city_size", "age", 
+                "sex",  "socialclass_selfAssesment","citizen", 
+                "socialclass_interviewerAssesment", "educ","opinion_immigrants", "presi_leading", "left_right")
+
+colnames(LB2023) <- c("survey_year", "country", "reg", "city", "city_size", "age", 
+                "sex",  "socialclass_selfAssesment","citizen", 
+                "socialclass_interviewerAssesment", "educ","opinion_immigrants", "presi_leading", "left_right")
+```
+
+### Merging datasets
+
+```{r}
+# Join LB2018 and LB2020
+All_LB <- LB2018 %>%
+  full_join(LB2020, by = c("survey_year", "country", "reg", "city", "city_size", 
+                           "age", "sex", "socialclass_selfAssesment", "citizen", 
+                           "socialclass_interviewerAssesment", "educ", "opinion_immigrants", "presi_leading", "left_right")) %>%
+  full_join(LB2023, by = c("survey_year", "country", "reg", "city", "city_size", 
+                           "age", "sex", "socialclass_selfAssesment", "citizen", 
+                           "socialclass_interviewerAssesment", "educ", "opinion_immigrants", "presi_leading", "left_right"))
+
+class(All_LB$survey_year)
+class(All_LB$country)
+
+All_LB <- All_LB %>%
+  mutate(survey_year = as.numeric(survey_year)) %>%
+  mutate(survey_year = if_else(survey_year == 23, 2023, survey_year)) %>% 
+  mutate(country = as.character(country))
+
+class(All_LB$survey_year)
+class(All_LB$country)
+
+colnames(All_LB)
+```
+### Replacing IDs for country name
+
+```{r, echi = FALSE}
+# Create a lookup table
+country_lookup <- data.frame(
+  code = as.character(c(32, 68, 76, 152, 170, 188, 214, 218, 222, 320, 340, 484, 558, 591, 600, 604, 724, 858, 862)),
+  name = c("Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Dominican Republic", "Ecuador",
+           "El Salvador", "Guatemala", "Honduras", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru",
+           "Spain", "Uruguay", "Venezuela")
+)
+
+# Join the lookup table
+All_LB <- All_LB %>%
+  mutate(country = as.character(country)) %>%
+  left_join(country_lookup, by = c("country" = "code")) %>%
+  mutate(country = factor(name)) %>%
+  select(-name)  # Optionally remove the lookup colum
+
+# Group by and count countries
+All_LB %>% 
+  group_by(country) %>% 
+  count()
+
+colnames(All_LB)
+```
+
+```{r, echo=FALSE, message = FALSE}
+LatAmSocial4 <- LatAmSocial3 %>%
+  mutate(country = case_when(
+    País__ESTANDAR == "Colombia" ~ "Colombia",
+    País__ESTANDAR == "El Salvador" ~ "El Salvador",
+    País__ESTANDAR == "Paraguay" ~ "Paraguay",
+    País__ESTANDAR == "Ecuador" ~ "Ecuador",
+    País__ESTANDAR == "Honduras" ~ "Honduras",
+    País__ESTANDAR == "Brasil" ~ "Brazil",
+    País__ESTANDAR == "Costa Rica" ~ "Costa Rica",
+    TRUE ~ NA_character_)) %>%
+  filter(country %in% c("Colombia", "El Salvador", "Paraguay", "Ecuador", "Honduras", "Brasil",
+                        "Costa Rica"),
+         Años__ESTANDAR %in% c("2018", "2020", "2023")) %>%
+  rename("survey_year" = "Años__ESTANDAR")
+
+```
+
+```{r include=FALSE, echo=FALSE}
+
+LatAmSocial4 <- LatAmSocial4 %>%
+  mutate(survey_year = as.character(survey_year))
+
+All_LB <- All_LB %>%
+  mutate(survey_year = as.character(survey_year))
+
+All_LB <- LatAmSocial4 %>%
+  left_join(All_LB, by = c("country", "survey_year"))
+
+str(LatAmSocial4)  
+str(All_LB)        
+
+colnames(All_LB)
+```
+### Eliminating NAs
+
+```{r}
+All_LB <- All_LB %>%
+  mutate(across(c(presi_leading),
+                ~ ifelse(. < 0 | . > 5, NA, .)))
+
+All_LB <- All_LB %>%
+  mutate(across(c(opinion_immigrants), 
+                ~ ifelse(. < 0 | . > 2, NA, .)))
+
+All_LB <- All_LB %>%
+  mutate(across(c(age), 
+                ~ ifelse(. < 0 | . > 100, NA, .)))
+colnames(All_LB)
+All_LB <- All_LB %>%
+  mutate(across(c(left_right),
+                ~ ifelse(. < 0 | . > 10, NA, .)))
+
+All_LB <- All_LB %>% 
+  filter(citizen == 1)
+```
+
+# Exploratory Data Analysis
+
+### Visualizing some variables of interest
+
+```{r}
+All_LB %>%
+  filter(country == "Colombia") %>%
+  ggplot(aes(x = opinion_immigrants)) +
+  geom_bar() +
+  theme_minimal()+
+  facet_wrap(~survey_year)
+```
+
+### Visualizing opinion immigrants based on proportion
+
+```{r}
+proportions <- All_LB %>%
+  filter(opinion_immigrants %in% c(1, 2)) %>%
+  group_by(survey_year, opinion_immigrants) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(survey_year) %>%
+  mutate(total = sum(count),
+         proportion = count / total)
+proportions %>%
+  ggplot(aes(x = factor(survey_year), y = proportion, fill = factor(opinion_immigrants))) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(
+    x = "Year",
+    y = "Proportion",
+    fill = "Opinion on Immigrants"
+  ) +
+  scale_fill_manual(values = c("1" = "skyblue2", "2" = "orange3"), 
+                    labels = c("1" = "Beneficial", "2" = "Harmful")) +
+  theme_minimal()
+```
+
+### Preparing variables of interest
+
+#### Social Class
+
+```{r}
+All_LB <- All_LB %>% 
+  filter(!is.na(socialclass_selfAssesment)) %>%  # Remove rows with missing values
+  mutate(SELFsocial_class = case_when(
+    socialclass_selfAssesment %in% c(1) ~ "Upper",      # Alta
+    socialclass_selfAssesment %in% c(2, 3) ~ "Middle", # Media Alta, Media
+    socialclass_selfAssesment %in% c(4, 5) ~ "Lower",  # Media Baja, Baja
+    TRUE ~ "Unknown"                                  # For values like 8 (No sabe) and 0 (No responde)
+  ))
+
+All_LB <- All_LB %>% 
+  filter(!is.na(socialclass_interviewerAssesment)) %>%  # Remove rows with missing values
+  mutate(PERCEIVEDsocial_class = case_when(
+    socialclass_interviewerAssesment %in% c(1) ~ "Upper",      # Alta
+    socialclass_interviewerAssesment %in% c(2, 3) ~ "Middle", # Media Alta, Media
+    socialclass_interviewerAssesment %in% c(4, 5) ~ "Lower",  # Media Baja, Baja
+    TRUE ~ "Unknown"                                  # For values like 8 (No sabe) and 0 (No responde) 
+    ))
+
+```
+
+```{r}
+All_LB %>%
+  count(SELFsocial_class) %>%
+  ggplot(aes(x = SELFsocial_class, y = n, fill = SELFsocial_class)) +
+  geom_col() +
+  labs(title = "Distribution of Self Assesed Social Classes", x = "Self Assesed Social Class", y = "Count") +
+  theme_minimal()
+
+All_LB %>%
+  count(PERCEIVEDsocial_class) %>%
+  ggplot(aes(x = PERCEIVEDsocial_class, y = n, fill = PERCEIVEDsocial_class)) +
+  geom_col() +
+  labs(title = "Distribution of Perceived Social Classes", x = "Perceived Social Class", y = "Count") +
+  theme_minimal()
+```
+
+#### Rural vs. Urban
+
+```{r}
+All_LB <- All_LB %>%
+  filter(!is.na(city_size)) %>%
+  mutate(urban_rural = ifelse(city_size %in% c(6, 7, 8), "Urban", "Rural"))
+```
+
+# Choosing controls
+
+\
+The influx of nearly 3 million Venezuelan migrants into Colombia due to the economic and political crisis under the Chávez-Maduro regime has transformed Colombia into the largest host country for Venezuelan refugees. This mass migration has highlighted tensions between resource allocation and social integration, creating fertile ground for xenophobia. Venezuelan migrants often face discrimination, with public perceptions heavily shaped by political narratives. While leftist President Gustavo Petro campaigned on a pro-migrant platform emphasizing human rights and dignity, his policies—combined with the legacy of right-wing scaremongering—may have amplified attitudes towards immigrants. Theories such as Blalock’s Group Threat Perspective and Merton’s concept of unintended consequences provide valuable frameworks to understand how economic competition and resource scarcity exacerbate tensions. Prior research suggests that proximity to migrants can improve trust, while economic hardships amplify resentment, making it essential to investigate how Petro’s presidency has influenced these dynamics. This study addresses a critical gap in migration literature by exploring the role of state-level political leadership in shaping public perceptions towards immigrants. To assess the impact of Gustavo Petro’s presidency on xenophobic attitudes, this study employs a Difference-in-Differences (DiD) design. The analysis compares shifts in public sentiment towards Venezuelans in Colombian regions with high and low concentrations of migrants before and after Petro’s election, using data from the Latinobarómetro survey. The study integrates additional socioeconomic data from SEDLAC and World Bank sources to control for confounding variables like unemployment and inflation. This analysis aims to isolate the effects of Petro’s policies while addressing potential biases from structural inequalities or regional differences. By comparing Colombia’s trends to similar nations, the study offers insights into how political rhetoric and socioeconomic conditions interact to influence xenophobia in migration-hosting nations.\
+\
+The first step in this analysis is to identify nations similar to Colombia that can serve as control variables, thus indicating what may have happened in Colombia had the treatment (Petro) never been received. All nations in Latin America were considered in the original data, as they would provide the most cultural and political similarity. To build on this, trends were analyzed for each of these countries to better understand the socioeconomic conditions of each country since 2016 (appendix a-c). Initial trends gave a good idea, but there was a lot of overlap, making it very subjective which were the “most similar.”\
+\
+To address this, key variables, such as poverty, unemployment, and migration rates, are weighted, with migration receiving the highest emphasis (weight = 3). Temporal trends are incorporated using a year-based weight adjustment to reflect changes over time, ensuring that more recent years are more significant in the distances. Weighted averages are then calculated for each country, with Colombia serving as a baseline. A weighted Euclidean distance is then used to measure how similar or different other countries are from Colombia, ranking them by proximity. This approach highlights regional patterns that may influence attitudes toward migrants while accounting for the importance of time and variable significance. The six most similar nations, then, were El Salvador, the Dominican Republic, Ecuador, Honduras, Costa Rica, and Paraguay (appendix d). These trend lines were visualized, with the chosen countries in red, Colombia in blue, and the remaining countries in gray (appendix e-g).\
+\
+
+
+### Eucledian Distances
+
+```{r}
+LatAmSocial3 <- LatAmSocial3 %>%
+  mutate(Años__ESTANDAR = as.numeric(as.character(Años__ESTANDAR)))
+
+
+# Define base weights for the variables
+base_weights <- c(
+  tasa_pobreza = 1,               # Weight for poverty rate
+  tasa_ansiedad_desempleo = 1,    # Weight for unemployment anxiety
+  tasa_medio_desempleo = 1,       # Weight for average unemployment
+  tasa_inmigracion_1000 = 3       # Higher weight for immigration
+)
+
+# Function to adjust weights based on year
+year_weight_multiplier <- function(year) {
+  (year - min(LatAmSocial3$Años__ESTANDAR, na.rm = TRUE) + 1) / 
+    (max(LatAmSocial3$Años__ESTANDAR, na.rm = TRUE) - min(LatAmSocial3$Años__ESTANDAR, na.rm = TRUE) + 1)
+}
+
+# Aggregate weighted averages for each country, adjusted by year
+country_means <- LatAmSocial3 %>%
+  group_by(País__ESTANDAR, Años__ESTANDAR) %>%
+  summarise(across(names(weights), mean, na.rm = TRUE), .groups = "drop") %>%
+  mutate(year_weight = year_weight_multiplier(Años__ESTANDAR)) %>%
+  group_by(País__ESTANDAR) %>%
+  summarise(
+    across(names(weights), ~ sum(. * year_weight, na.rm = TRUE)), .groups = "drop"
+  )
+
+# Calculate Colombia's weighted averages
+colombia_means <- LatAmSocial3 %>%
+  filter(País__ESTANDAR == "Colombia") %>%
+  summarise(across(names(base_weights), mean, na.rm = TRUE)) %>%
+  unlist()  # Convert to vector for easier indexing
+
+# Aggregate weighted averages for each country, adjusted by year
+country_means <- LatAmSocial3 %>%
+  group_by(País__ESTANDAR, Años__ESTANDAR) %>%
+  summarise(across(names(base_weights), mean, na.rm = TRUE), .groups = "drop") %>%
+  mutate(year_weight = year_weight_multiplier(Años__ESTANDAR)) %>%
+  group_by(País__ESTANDAR) %>%
+  summarise(
+    across(names(base_weights), ~ sum(. * year_weight, na.rm = TRUE)), .groups = "drop"
+  )
+
+# Calculate weighted Euclidean distance from Colombia for each country
+country_means <- country_means %>%
+  mutate(distance = sqrt(
+    base_weights["tasa_pobreza"] * (tasa_pobreza - colombia_means["tasa_pobreza"])^2 +
+    base_weights["tasa_ansiedad_desempleo"] * (tasa_ansiedad_desempleo - colombia_means["tasa_ansiedad_desempleo"])^2 +
+    base_weights["tasa_medio_desempleo"] * (tasa_medio_desempleo - colombia_means["tasa_medio_desempleo"])^2 +
+    base_weights["tasa_inmigracion_1000"] * (tasa_inmigracion_1000 - colombia_means["tasa_inmigracion_1000"])^2
+  ))
+
+# Arrange by smallest distance
+country_distances <- country_means %>%
+  arrange(distance)
+
+# View results
+print(country_distances)
+
+```
+
+We did not manage to change the legend names, but the plots should be interactive
+
+```{r}
+euclidean_countries <- c("Colombia", "El Salvador", "Ecuador", 
+                         "Honduras", "Costa Rica", "Paraguay", "Brasil")
+
+
+LatAmSocial3 <- LatAmSocial3 %>%
+  mutate(line_color = case_when(
+    País__ESTANDAR == "Colombia" ~ "blue",                
+    País__ESTANDAR %in% euclidean_countries ~ "red",    
+    
+    TRUE ~ "gray")) %>%
+  filter(País__ESTANDAR != "América Latina")
+
+```
+
+```{r, warning=FALSE}
+unemployment_rate <- ggplot(LatAmSocial3, aes(x = Años__ESTANDAR, y = tasa_medio_desempleo, 
+                             color = line_color, group = País__ESTANDAR, text = País__ESTANDAR)) +
+  geom_smooth(se = FALSE) +  
+  scale_color_identity() +
+  labs(
+    title = "Unemployment Rate Trends by Country",
+    x = "Year",
+    y = "Unemployment Rate"
+  ) +
+  theme_minimal()
+
+# Convert the plot to an interactive plot with hover text
+ggplotly(unemployment_rate , tooltip = "text")
+
+```
+
+```{r, warning=FALSE}
+poverty <- ggplot(LatAmSocial3, aes(x = Años__ESTANDAR, y = tasa_pobreza, 
+                             color = line_color, group = País__ESTANDAR, text = País__ESTANDAR)) +
+  geom_smooth(se = FALSE) +  
+  scale_color_identity() +   
+  labs(
+    title = "Poverty Rate Trends by Country",
+    x = "Year",
+    y = "Poverty Rate"
+  ) +
+  theme_minimal()
+
+# Convert the plot to an interactive plot with hover text
+ggplotly(poverty, tooltip = "text")
+```
+
+```{r, warning=FALSE}
+job_vulnerability <- ggplot(LatAmSocial3, aes(x = Años__ESTANDAR, y = tasa_ansiedad_desempleo, 
+                             color = line_color, group = País__ESTANDAR, text = País__ESTANDAR)) +
+  geom_smooth(se = FALSE) +  
+  scale_color_identity() +   
+  labs(
+    title = "Employment Anxiety Rate Trends by Country",
+    x = "Year",
+    y = "Employment Anxiety Rate"
+  ) +
+  theme_minimal()
+
+# Convert the plot to an interactive plot with hover text
+ggplotly(job_vulnerability, tooltip = "text")
+```
+
+```{r, warning=FALSE}
+migration_rate <- ggplot(LatAmSocial3, aes(x = Años__ESTANDAR, y = tasa_inmigracion_1000, 
+                             color = line_color, group = País__ESTANDAR, text = País__ESTANDAR)) +
+  geom_smooth(se = FALSE) +  
+  scale_color_identity() +   
+  labs(
+    title = "Immigration Rate Trends by Country",
+    x = "Year",
+    y = "Immigration Rate"
+  ) +
+  theme_minimal()
+
+# Convert the plot to an interactive plot with hover text
+ggplotly(migration_rate, tooltip = "text")
+
+```
+
+
+# DiD
+
+Once the controls were chosen, we heavily cleaned the Latinobarómetro data by keeping only variables of interest, such as demographic information (e.g., age, sex, and city size) and key socio-political indicators such as trust in the president, satisfaction with democracy, perceptions of inequality, and attitudes toward immigrants. Other cleaning included renaming and other ways of creating a consistent structure that allowed for a longitudinal analysis of public opinion trends across Latin American countries. Visualizations were then generated for variables of interest, with a particular focus on Colombia to explore trends over time. These visualizations, including bar plots of trust in the president and attitudes toward democracy, allowed us to observe shifts in public opinion across survey years. This approach not only allows for cross-national comparisons but also provides a framework for understanding the sociopolitical landscape in Latin America.\
+\### Creating variables for DID
+
+```{r}
+All_LB <- All_LB %>%
+  mutate(
+    treated = ifelse(country == "Colombia", 1, 0), 
+    post = ifelse(survey_year > 2020, 1, 0),      
+    did = treated * post  
+  )
+
+```
+
+#### Binary opinion_immigrants
+
+```{r}
+All_LB <- All_LB %>%
+  mutate(opinion_immigrants_binary = opinion_immigrants - 1)
+```
+
+### Preliminary model
+
+```{r}
+model_bin_basic <- glm(opinion_immigrants_binary ~ treated + post + did, data = All_LB, family = binomial)
+
+summary(model_bin_basic)
+
+exp(coef(model_bin_basic))
+```
+
+#### Model analysis
+```{r}
+model_1 <- glm(opinion_immigrants_binary ~ treated + post + did+
+                   tasa_medio_desempleo +
+                   tasa_inmigracion_1000 + tasa_pobreza ,
+                    data = All_LB, 
+                 family = "binomial")
+
+summary(model_1)
+exp(coef(model_1))
+
+model_2 <- glm(opinion_immigrants_binary ~ treated + post + did +
+                   tasa_medio_desempleo*survey_year + tasa_inmigracion_1000*survey_year + tasa_pobreza*survey_year,
+                    data = All_LB, 
+                 family = "binomial")
+
+
+
+summary(model_2)
+exp(coef(model_2))
+
+model_3 <- glm(opinion_immigrants_binary ~ treated + post + did +
+                   tasa_medio_desempleo*survey_year + tasa_inmigracion_1000*survey_year + tasa_pobreza*survey_year + presi_leading + urban_rural + SELFsocial_class + left_right,
+                    data = All_LB, 
+                 family = "binomial")
+
+
+
+summary(model_3)
+exp(coef(model_3))
+plot(model_3)
+
+model_4 <- glm(opinion_immigrants_binary ~ treated + post + did +
+                   tasa_medio_desempleo*survey_year + tasa_inmigracion_1000*survey_year + tasa_pobreza*survey_year + presi_leading + left_right,
+                    data = All_LB, 
+                 family = "binomial")
+
+
+
+summary(model_4)
+exp(coef(model_4))
+
+```
+
+

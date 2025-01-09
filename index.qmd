@@ -2,23 +2,25 @@
 title: "Portafolio"
 ---
 
-## <span style="color: Darkgreen; font-family: monospace; font-weight: bold; font-size: 25px;">About Me</span>
+## [About Me]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
 
-::: {.grid}
-::: {.g-col-4}
-![](Headshot_Fall2024.jpg){width=200px style="border-radius: 20px;"}
+::::: grid
+::: g-col-4
+
+![](Headshot_Fall2024.jpg){width="200px" style="border-radius: 30px;"}
 :::
-::: {.g-col-8}
 
+::: g-col-8
 ### Nibia Becerra Santillan
-**Pronouns:** <span style="font-style: italic">she/her</span> 
 
-**Education:** Macalester College, B.A. Biology and Statistics 
+**Pronouns:** [she/her]{style="font-style: italic"}
 
-**Short Bio:** Add Bio about your background, interests, and expertise.
+**Education:** Macalester College, B.A. Biology and Statistics
+
+**Short Bio:** My passion lies in translating scientific knowledge into actionable solutions with real-world impact. With my strong theoretical foundation and hands-on experience, I aspire to bridge the gap between responsible, community-based science and practical projects that directly benefit people. As a problem solver with a global perspective and a relational approach to finding solutions, I work well in collaborative environments and care deeply about building meaningful connections within a team. I bring a thoughtful and creative approach to challenges and I am excited to share my experiences, support others in their goals, and help create a space where impactful, actionable ideas can grow.
 :::
-:::
+:::::
 
-## <span style="color: Darkgreen; font-family: monospace; font-weight: bold; font-size: 25px;">Experience</span>
+## [Experience]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
 
 <embed src="Resume_Oct2024.pdf" type="application/pdf" width="100%" height="1000px" />

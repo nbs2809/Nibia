@@ -1,1 +1,30 @@
 /* css styles */
+/* Navbar styling */
+.navbar {
+    background-color: #556B2F; /* Main olive green */
+    border-bottom: 2px solid #3B4D1A; /* Optional darker border */
+}
+
+.navbar a {
+    color: #FFFFFF !important; /* White text for contrast */
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #D5E8A0; /* Light olive green on hover */
+}
+
+/* Ensure dropdown menus match the style */
+.dropdown-menu {
+    background-color: #556B2F; /* Match navbar color */
+    border-color: #3B4D1A; /* Optional border for dropdown */
+}
+
+.dropdown-item {
+    color: #FFFFFF !important;
+}
+
+.dropdown-item:hover {
+    background-color: #3B4D1A; /* Darker olive green for hover */
+    color: #FFFFFF !important;
+}

@@ -1,0 +1,76 @@
+---
+title: "DiD_ColombiaVenezuela"
+editor: visual
+---
+tttttttttt
+# Data Preparation
+
+### Loading packages
+
+```{r, message= FALSE, warning= FALSE}
+library(ggplot2)
+library(tidyverse)
+library(haven)
+library(dplyr)
+source("pt1.R")
+library(plotly)
+# library(dagitty)
+```
+
+## Loading Latinobarometro Data
+
+\
+\### Laoding 2020 and 2023 .rdata datasets
+
+```{r}
+load("data/Latinobarometro_2020_Eng_Rdata_v1_0.rdata")
+
+load("data/Latinobarometro_2023_Eng_Rdata_v1_0.rdata")
+
+```
+
+### Loading 2018 .dta data set
+
+```{r}
+LB2018 <- read_dta("data/Latinobarometro_2018_Esp_Stata_v20190303.dta")
+
+```
+
+## Select Varibles of interest
+```{r}
+LB2018 <- LB2018 %>% 
+  select("NUMINVES", "IDENPA", "REG", "CIUDAD", "TAMCIUD", 
+  "EDAD", "SEXO", "S1", "S16", "S26", "S10", "P42NC", "P20STGBSC", "P22ST")
+LB2020 <- Latinobarometro_2020_Eng %>%
+  select("numinves", "idenpa", "reg", "ciudad", "tamciud", 
+  "edad", "sexo", "s1", "s21", "s30", "s16", "p38n", "p17stgbs", "p18st") 
+LB2023 <- Latinobarometro_2023_Eng_v1_0 %>%
+  select("numinves", "idenpa", "reg", "ciudad", "tamciud", 
+  "edad", "sexo", "S2", "S16", "S24", "S21B", "P32INN", "P15STGBS", "P16ST")
+```
+
+#### Check the columns
+
+```{r}
+# Check column names in each dataset
+colnames(LB2018)  # Inspect column names in LB2018
+colnames(LB2020)  # Inspect column names in LB2020
+colnames(LB2023)  # Inspect column names in LB2023
+
+```
+
+### Change variable names
+
+```{r}
+colnames(LB2018) <- c( "survey_year", "country", "reg", "city", "city_size", "age", 
+                "sex", "socialclass_selfAssesment","citizen", 
+                "socialclass_interviewerAssesment", "educ","opinion_immigrants", "presi_leading", "left_right")
+
+colnames(LB2020) <- c("survey_year", "country", "reg", "city", "city_size", "age", 
+                "sex",  "socialclass_selfAssesment","citizen", 
+                "socialclass_interviewerAssesment", "educ","opinion_immigrants", "presi_leading", "left_right")
+
+colnames(LB2023) <- c("survey_year", "country", "reg", "city", "city_size", "age", 
+                "sex",  "socialclass_selfAssesment","citizen", 
+                "socialclass_interviewerAssesment", "educ","opinion_immigrants", "presi_leading", "left_right")
+```
