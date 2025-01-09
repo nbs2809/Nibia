@@ -1,12 +1,11 @@
 ---
-title: "Portafolio"
+title: "Portfolio"
 ---
 
 ## [About Me]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
 
 ::::: grid
 ::: g-col-4
-
 ![](Headshot_Fall2024.jpg){width="200px" style="border-radius: 30px;"}
 :::
 
