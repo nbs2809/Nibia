@@ -20,6 +20,4 @@ title: "Portfolio"
 :::
 :::::
 
-## [Experience]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
-
-<embed src="Resume_Oct2024.pdf" type="application/pdf" width="100%" height="1000px" />
+## 
