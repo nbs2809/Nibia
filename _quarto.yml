@@ -20,6 +20,10 @@ website:
             href: LDA_thematic_analysis/Report.qmd
           - text: Clustering
             href: Clustering.qmd
+      - text: STAT Content Summary
+        menu:
+          - text: Intro to GWAS
+            href: Content_Summary.qmd
                 
     right:
       - icon: envelope

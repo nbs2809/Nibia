@@ -156,6 +156,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
     </ul>
   </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-stat-content-summary" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">STAT Content Summary</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-stat-content-summary">    
+        <li>
+    <a class="dropdown-item" href="./Content_Summary.html">
+ <span class="dropdown-text">Intro to GWAS</span></a>
+  </li>  
+    </ul>
+  </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
@@ -944,8 +955,8 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>plot_path <span class="ot">&lt;-</span> <span class="cf">function</span>(data, title) {</span>
 <span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> Stage, <span class="at">y =</span> Mean, <span class="at">group =</span> <span class="fu">interaction</span>(WHC, Initial.Temperature))) <span class="sc">+</span></span>
 <span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> WHC, <span class="at">linetype =</span> Initial.Temperature), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">shape =</span> Initial.Temperature), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> Mean <span class="sc">-</span> SEM, <span class="at">ymax =</span> Mean <span class="sc">+</span> SEM), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">shape =</span> Initial.Temperature), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  </span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> Mean <span class="sc">-</span> SEM, <span class="at">ymax =</span> Mean <span class="sc">+</span> SEM, <span class="at">color =</span> WHC,  <span class="at">linetype =</span> Initial.Temperature), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span>  <span class="co"># Color-matched error bars</span></span>
 <span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_d</span>(<span class="at">option =</span> <span class="st">"plasma"</span>, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
 <span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
 <span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> title,</span>
@@ -961,8 +972,9 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot each path separately</span></span>
-<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>plot_path4 <span class="ot">&lt;-</span> <span class="fu">plot_path</span>(path4_data, <span class="st">"Evolution of Extractable C: Stages 1 → 2 → 3 → 4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot each path separately</span></span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>plot_path4 <span class="ot">&lt;-</span> <span class="fu">plot_path</span>(path4_data, <span class="st">"Evolution of Extractable C: Stages 1 → 2 → 3 → 4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 ℹ Please use `linewidth` instead.</code></pre>

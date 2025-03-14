@@ -1,0 +1,368 @@
+---
+title: "Nibia Content Summary 2"
+subtitle: "Simulation Study on Climate Adaptation using PCA"
+image: "../images/pca_scoreplot.png"
+# bibliography: "../files/references.bib"
+date: "March 14, 2025"
+author: "Nibia"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    embed-resources: true
+    code-tools: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+```
+
+```{r, message = FALSE, include=FALSE}
+library(tidyverse)
+library(GGally)
+library(gridExtra)
+```
+
+## **🌡 Simulation Study on Climate Adaptation using PCA 🌡** {.unnumbered .smaller}
+
+We will study the Tree Climate Adaptation by simulating SNPs data associated to Carbon Release rate at different elevations.
+
+### Research Question
+
+**Primary Question**: Do tree populations at different elevations have SNPs associated with adaptive traits (e.g., metabolic rate, CO2 release) that allow them to cope with changing temperatures?
+
+**Secondary Question**: Can we identify specific SNPs that contribute to reduced CO2 emissions in trees from lower elevations, where temperatures have increased the most due to climate change?
+
+### Hypotheses
+
+**Hypothesis 1**: Trees at lower elevations have SNPs associated with reduced metabolic rates (lower CO2 release) as an adaptation to higher temperatures.
+
+**Hypothesis 2**: These SNPs are under positive selection in lower-elevation populations due to climate change pressures.
+
+**Hypothesis 3**: The identified SNPs are linked to genes involved in stress response, carbon metabolism, or mitochondrial efficiency.
+
+### Why do we want to use PCA?
+
+1.  🌱 Population Structure 🌱
+
+2.  🧬 Genetic Variation Across Elevations 🧬
+
+3.  If there are observations that fit the population structures we are expecting?????
+
+4.  🚩 Confounding in GWAS 🚩
+
+#### Parts of PCA (needs editing from regular notes)
+
+-   What are the scores?
+
+Values that this new variables take. Each variable outputs a score. PC coordinates are the score, kind of like the new value that this transformation take. For example: 0.3 in PC1, and 0.8 in PC2
+
+-   What are the loadings? Coefficient of the The a's are the loadings (weight, contribution of each of the og variables to this new variable PC.)
+
+-   Does the order of the PCs have any particular meaning? The order decrease from the Linear combination that explains most variation
+
+## **🌳 Simulating Tree Genetic Data 🌳** {.unnumbered .smaller}
+
+We will generate:\
+
+1.  **1000 tress** with **random SNPs** (0, 1, 2 copies of a minor allele).\
+2.  A tertiary **CO2 release rate** trait (higher, med, low???) influenced by a SNP.\
+3.  **3 tree species at different elevations** which are our populations.
+
+#### Considerations for simulating data
+
+-   Using `runif`: why?
+
+::: {.callout-note icon="false" title="Why do we use `runif`?"}
+Add explanation
+:::
+
+### Our Dataset
+
+```{r, output = FALSE}
+set.seed(394)
+
+n_individuals <- 1000  # individuals
+n_snps <- 15          # SNPs
+n_populations <- 3    # populations (elevations)
+
+# Make population labels (Populations will be trees of the same species but different genus)
+population <- sample(1:n_populations, n_individuals, replace = TRUE)
+
+# make elevation (environmental covariate????)
+# I am using runif to simulate my data because I want my 3 elevations (continuous variable) to take any value within the range that I had specified. Also looks like rnom would be used in contexts where there are no limits (which in my example would give values that don't make sense)
+
+elevation <- ifelse(population == 1, runif(n_individuals, 100, 300),  # Lower on the slope
+                    ifelse(population == 2, runif(n_individuals, 300, 600),  # Mid-slope
+                           runif(n_individuals, 600, 1000)))  # Higher in the slope
+
+# making elevation a category since it is hard to do the later steps with the continuos variables
+elevation_categorical <- case_when(
+  elevation < 300 ~ "low",       # Assign "low" if elevation < 300
+  elevation < 600 ~ "mid",       # Assign "mid" if 300 <= elevation < 600
+  elevation >= 600 ~ "high"      # Assign "high" if elevation >= 600
+)
+```
+
+If we can sample() and rep()
+
+```{r}
+# Since I did not see any population separation, I am trying some code that DeepSeek gave me
+
+# Simulate SNP data with population-specific allele frequencies
+snp_data <- matrix(nrow = n_individuals, ncol = n_snps)
+for (i in 1:n_snps) {
+  # Different MAF for each population
+  maf_pop1 <- runif(1, min = 0.1, max = 0.3)  # Low MAF for population 1
+  maf_pop2 <- runif(1, min = 0.4, max = 0.6)  # Medium MAF for population 2
+  maf_pop3 <- runif(1, min = 0.7, max = 0.9)  # High MAF for population 3
+
+  # Assign MAF based on population
+  maf <- ifelse(population == 1, maf_pop1,
+                ifelse(population == 2, maf_pop2, maf_pop3))
+
+  # Simulate SNP data
+  snp_data[, i] <- rbinom(n_individuals, size = 2, prob = maf)
+}
+
+```
+
+Question for Kelsey: Could you please send me the code that allows us to determine the difference frequency of certain SNPs in our different populations? 
+
+```{r, output = FALSE}
+# # minor allele frequencies
+# maf <- runif(n_snps, min = 0.1, max = 0.6)  # MAF between 10% and 60%
+# 
+# # I made a function based on what I did for Content Summary 2, specially because now we have more SNPs (we just learned this in STAT212!!!!)
+# # Also I made a matrix instead of a data frame because (apparently!!) it will be easier to perform operations with other matrixes (dataframes that I have converted, too).
+# 
+# snp_data <- matrix(nrow = n_individuals, ncol = n_snps)
+# for (i in 1:n_snps) {
+#   snp_data[, i] <- rbinom(n_individuals, size = 2, prob = maf[i])
+# }
+# 
+# # I asked DeepSeek how would that for loop look like using map(), but I don't find it more intuitive or readable :(
+# # snp_data <- map_dfc(1:n_snps, ~ rbinom(n_individuals, size = 2, prob = maf[.x]))
+# # snp_data <- as.matrix(snp_data)
+
+# View first few rows
+head(snp_data)
+```
+
+```{r}
+# CO2 release rate (trait) influenced by SNPs and elevation (we know, but supposedly others would not know bcs that is the twist of the covariate)
+
+# I was going to use the MAF that i had in my previous Content Summary, but I was not sure if I would have to create the 
+genetic_effect <- 0.5 * snp_data[, 1] + 0.3 * snp_data[, 7] - 0.4 * snp_data[, 11]
+environmental_effect <- -0.01 * elevation  # higher elevation reduces C02 release rate, bcs it is colder
+#I am adding noise so it is not as perfect looking to our trait
+trait <- genetic_effect + environmental_effect + rnorm(n_individuals, mean = 0, sd = 0.5)
+
+# Combine into a data frame
+tree_pcadata <- data.frame(population = as.factor(population), elevation = elevation, trait = trait, elevation_categorical = elevation_categorical, snp_data)
+colnames(pcadata)[4:(n_snps + 3)] <- paste0("SNP", 1:n_snps)
+
+# View the first few rows
+head(tree_pcadata)
+dim(tree_pcadata)
+```
+
+## Exploring the Data
+
+```{r}
+tree_pcadata %>% 
+  group_by(population) %>% 
+  count()
+```
+
+Are there any SNPs that seem to be more common in one population than the other? By how much do the allele frequencies in the two populations differ for each SNP?
+
+```{r}
+# function to get empirical minor allele frequency
+## count up how many minor alleles are observed
+## divide by two times the number of people
+get_MAF <- function(snp){
+  sum(snp)/(2*length(snp))
+}
+
+# get observed allele frequency for each population
+maf_by_population <- tree_pcadata %>%
+  group_by(population) %>%
+  summarize(across(starts_with("SNP"), get_MAF)) #Since I have elevation_categorical, it was getting a little crazy
+
+```
+
+# Needs editing - interpret tree_pcadata
+
+::: {.callout-note icon="false" title="Interpretation"}
+Since we are talking about different populations, we do not establish a minor allele, but we can choose a reference allele to make the comparison between the allele frequency in the different SNP's (it would be a different for each SNPs). We observed that Population 2 had a higher frequency of the chosen allele for SNPs that have a higher mean than population 1, and viceversa. The five SNP's are the most different, 2 are very different and the other three are somewhat different.
+:::
+
+## Running PCA
+
+```{r pca-setup}
+head(tree_pcadata)
+
+tree_geno <- tree_pcadata %>%
+  select(-population, -trait, - elevation, -elevation_categorical)
+
+head(tree_geno)
+```
+
+```{r run-pca}
+tree_pca_out <- prcomp(tree_geno, center = TRUE, scale = TRUE)
+```
+
+::: {.callout-note icon="false" title="Why do we use `prcomp`?"}
+prcomp returns a list with class "prcomp" containing the following components:
+
+-   Loadings: rotation
+
+    This is the matrix of variable loadings (eigenvectors). Each column corresponds to a principal component, and each row corresponds to a variable in the original data. These loadings describe how each original variable contributes to the principal components.
+
+-   Scores: x
+
+    This contains the scores for the PCA analysis. These are the coordinates of the observations (samples) in the new principal component space. Each column corresponds to a principal component, and each row corresponds to an observation.
+:::
+
+\
+
+### Extracting Loadings and Scores
+
+```{r extract-scores-and-loadings}
+
+# loadings
+
+tree_pca_loadings <- tree_pca_out$rotation
+
+#scores
+
+tree_pca_scores <- tree_pca_out$x
+
+```
+
+\
+\
+
+### Plot Results
+
+#### Scores
+
+```{r plot-scores}
+colnames(tree_pcadata)
+
+tree_pca_scores %>%
+  as.data.frame() %>% # convert pca_scores into a data frame for plotting
+  mutate(population = as.factor(tree_pcadata$population)) %>%  # add the population labels
+  ggplot(aes(x = PC1, y = PC2, color = population)) + # then plot
+  geom_point() + 
+  scale_color_brewer(palette = 'Dark2')+
+  theme_minimal()
+
+tree_pca_scores %>%
+  as.data.frame() %>% # convert pca_scores into a data frame for plotting
+  mutate(elevation_categorical = as.factor(tree_pcadata$elevation_categorical)) %>%  # add the population labels
+  ggplot(aes(x = PC1, y = PC2, color = elevation_categorical)) + # then plot
+  geom_point() + 
+  scale_color_brewer(palette = 'Dark2')+
+  theme_minimal()
+
+```
+
+::: {.callout-note icon="false" title="Interpretation"}
+:::
+
+#### Parallel Coordinates Plot
+
+```{r parallel-coordinates}
+# parallel coordinates plot
+tree_pca_scores %>%
+  as.data.frame() %>%
+  mutate(population = as.factor(tree_pcadata$population)) %>% 
+  ggparcoord(columns = 1:15, groupColumn = 'population', alpha = 0.2) + 
+  theme_minimal() + 
+  scale_color_brewer(palette = 'Dark2')
+```
+
+::: {.callout-note icon="false" title="Interpretation"}
+:::
+
+#### Loadings Plot
+
+```{r}
+pc1_loadings <- tree_pca_out$rotation[, 1]
+
+
+loadings_df <- data.frame(
+  SNP = rownames(tree_pca_out$rotation),  # SNP names
+  Loading = pc1_loadings             # Loadings for PC1
+)
+
+ggplot(loadings_df, aes(x = reorder(SNP, Loading), y = Loading, fill = Loading)) +
+  geom_bar(stat = "identity") +
+  labs(x = "SNP", y = "Loading", title = "Loadings of SNPs for PC1",
+    fill = "Loading"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+::: {.callout-note icon="false" title="Interpretations"}
+SNP1 and SNP2 contribute the most for PC1 positively. Then the other three that also have some big positive contributions are SNP 3,4, and 5.
+:::
+
+\
+\
+
+#### Variance Explained
+
+What proportion of total variance each PC explains, we can create what's known as a scree plot. The code chunk below calculates the proportion of variance explained.
+
+```{r}
+# extract variance of each PC
+tree_pca_var <- (tree_pca_out$sdev)^2
+
+# calculate proportion of variance explained
+tree_total_var <- sum(tree_pca_var)
+tree_pve <- tree_pca_var/tree_total_var
+```
+
+\
+
+#### Visualizing the Proportion of variance explained compares across the PCs
+
+```{r}
+
+# SNPs
+tree_pve %>%
+  as.data.frame() %>%
+  mutate(index = seq_len(length(tree_pca_var))) %>%
+  ggplot(aes(x = index, y = tree_pve)) + 
+  geom_point() + 
+  geom_line() + 
+  labs(x = 'SNP Number', y = 'Percent of Variance Explained') + 
+  theme_minimal()
+
+# PCs
+
+# Create data frame for plotting
+tree_variance_df <- data.frame(
+  PC = factor(1:length(tree_pve)),
+  Individual = tree_pve,
+  Cumulative = cumsum(tree_pve)
+  )
+
+# Create scree plot
+ggplot(tree_variance_df, aes(x = PC)) +
+  geom_col(aes(y = Individual)) +
+  geom_point(aes(y = Cumulative)) +
+  geom_line(aes(y = Cumulative, group = 1)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Principal Component", y = "Proportion of Variance Explained", title = "Scree Plot with Cumulative Variance") +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank())
+
+
+```
