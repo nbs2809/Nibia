@@ -160,7 +160,7 @@ trait <- genetic_effect + environmental_effect + rnorm(n_individuals, mean = 0, 
 
 # Combine into a data frame
 tree_pcadata <- data.frame(population = as.factor(population), elevation = elevation, trait = trait, elevation_categorical = elevation_categorical, snp_data)
-colnames(pcadata)[4:(n_snps + 3)] <- paste0("SNP", 1:n_snps)
+colnames(tree_pcadata)[4:(n_snps + 3)] <- paste0("SNP", 1:n_snps)
 
 # View the first few rows
 head(tree_pcadata)

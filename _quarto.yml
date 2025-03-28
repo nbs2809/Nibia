@@ -24,6 +24,8 @@ website:
         menu:
           - text: Intro to GWAS
             href: Content_Summary.qmd
+          - text: PCA for GWAS 
+            href: ContentSummary2forreal.qmd
                 
     right:
       - icon: envelope

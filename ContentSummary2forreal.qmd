@@ -1,0 +1,436 @@
+---
+title: "Simulation Study on Climate Adaptation using PCA"
+subtitle: "Content Summary 2"
+image: "../images/pca_scoreplot.png"
+# bibliography: "../files/references.bib"
+date: "March 27, 2025"
+author: "Nibia Becerra Santillan"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    embed-resources: true
+    code-tools: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+```
+
+```{r, message = FALSE, include=FALSE}
+library(tidyverse)
+library(GGally)
+library(gridExtra)
+```
+
+## **🌡 Simulation Study on Climate Adaptation using PCA 🌡** {.unnumbered .smaller}
+
+We will study the Tree Climate Adaptation by simulating SNPs data associated to Carbon Release rate.
+
+### Research Question
+
+**Primary Question**: Do studied tree populations have SNPs associated with adaptive traits (e.g., metabolic rate, CO2 release) that allow them to cope with changing temperatures?
+
+**Secondary Question**: Can we identify specific SNPs that contribute to reduced CO2 emissions in trees from lower elevations, where temperatures have increased the most due to climate change?
+
+### Hypotheses
+
+**Hypothesis 1**: Trees from different populations wil not show any SNPs association with reduced metabolic rates (lower CO2 release) as an adaptation to higher temperatures.
+
+**Hypothesis 2**: The identified SNPs are linked to genes involved in stress response, carbon metabolism, or mitochondrial efficiency.
+
+
+To answer this questions we will conduct a simulation study.
+
+### Our Dataset
+
+#### **🌳 Simulating Tree Genetic Data 🌳** {.unnumbered .smaller}
+
+We will generate:\
+
+1.  **1000 tress** with **random SNPs** (0, 1, 2 copies of a minor allele).\
+2.  A tertiary **CO2 release rate** trait (higher, med, low???) influenced by a SNP.\
+3.  **3 tree species at different elevations** which are our populations.
+
+
+```{r, output = FALSE}
+set.seed(394)
+
+n_individuals <- 1000  
+n_snps <- 15          
+n_populations <- 3     # populations (elevations)
+
+# population labels (equal group sizes for PCA clarity)
+popidx <- rep(1:n_populations, each = ceiling(n_individuals/n_populations))[1:n_individuals]
+
+#MAF patterns for 3 SNP types  (Does this make sense?)
+maf1 <- c(0, 0.8, 0.7)   # Type 1: Only in populations 2 and 3
+maf2 <- c(0.3, 0.5, 0.6) # Type 2: Common in all, but varying
+maf3 <- c(0.3, 0.1, 0.5) # Type 3: Mostly in population 3
+
+# Function to simulate SNPs with population-specific MAFs
+sim_data_onevar <- function(pop, maf) {
+  rbinom(n = length(pop), size = 2, prob = maf[pop])
+}
+
+# Simulate SNPs for each type
+snps1 <- replicate(5, sim_data_onevar(pop = popidx, maf = maf1))  # 5 SNPs of type 1
+snps2 <- replicate(5, sim_data_onevar(pop = popidx, maf = maf2))  # 5 SNPs of type 2
+snps3 <- replicate(5, sim_data_onevar(pop = popidx, maf = maf3))  # 5 SNPs of type 3
+
+# Combine all SNPs into a matrix
+snp_data <- cbind(snps1, snps2, snps3)
+```
+
+```{r}
+elevation <- ifelse(
+  popidx == 1, runif(n_individuals, 100, 300),    # Low elevation
+  ifelse(
+    popidx == 2, runif(n_individuals, 300, 600),  # Mid elevation
+    runif(n_individuals, 600, 1000)               # High elevation
+  )
+)
+
+elevation_category <- case_when(
+  elevation < 300 ~ "low",
+  elevation < 600 ~ "mid",
+  elevation >= 600 ~ "high"
+)
+```
+
+```{r}
+# effect sizes to SNPs (adjust indices based on SNP types)
+genetic_effect <- 
+  0.5 * snp_data[, 1] +   # SNP1 (type 1)
+  0.3 * snp_data[, 6] -   # SNP6 (type 2)
+  0.4 * snp_data[, 11]    # SNP11 (type 3)
+
+# environmental effect (higher elevation = lower CO2 release) (Confounder, no?)
+environmental_effect <- -0.01 * elevation
+
+# make trait and add noise
+trait <- genetic_effect + environmental_effect + rnorm(n_individuals, mean = 0, sd = 0.5)
+```
+
+```{r}
+tree_pcadata <- data.frame(
+  population = as.factor(popidx),
+  elevation = elevation,
+  elevation_category = as.factor(elevation_category),
+  trait = trait,
+  snp_data
+)
+
+# Name SNP columns
+colnames(tree_pcadata)[5:(ncol(tree_pcadata))] <- paste0("SNP", 1:ncol(snp_data))
+```
+
+## **Looking at the data, do you notice that there are variables or other factors that might influence our results other than tree populations?**
+
+```{r}
+head(tree_pcadata)
+dim(tree_pcadata)
+```
+
+
+::: {.callout-note icon="false" title="What is the other factor?"}
+Hint: Starts with "E", and ends with "levation"
+:::
+
+
+
+### Why do we care about this other factor? How could it play a role in our experiment?
+\
+
+🚩 Confounding in GWAS 🚩
+
+"A confounder is a common cause of both the causal variable of interest and the outcome (e.g. living area could be a confounder of fireplace presence and house price)" (STAT 155 Notes, Macalester Statistics Faculty).
+
+A variable $X_2$ is a confounder if:
+- causally associated with the outcome Y in the population 
+- causally associated with the predictor of interest $X_1$ in the population
+(i.e., $X_2$ is a common cause of both the outcome and predictor of interest)
+
+![Causal Graph](./CausalGraph_Confounding.jpeg)
+
+
+
+### Generally in GWAS...
+
+🧬 Genetic Variation Across Elevations 🧬
+
+Environmental gradients (e.g., elevation, climate) can drive spatially structured genetic variation through local adaptation. For example, populations at high altitudes often exhibit allele frequency shifts in genes like EPAS1, linked to hypoxia tolerance (e.g., Tibetan populations as showed by Simonson et al., 2010).
+
+In GWAS, such geographic or environmental clines can confound SNP-trait associations if unmodeled.
+
+PCA helps to:
+
+    Detect continuous genetic gradients (e.g., allele frequency changes correlated with elevation).
+
+    Adjust for confounding by including top principal components (PCs) as covariates, isolating true SNP-trait signals from spatially structured noise.
+
+
+
+### Specifically for this study...
+
+The question marks on our Causal Graph that go from Elevation to Tree genus, and Elevation to Metabolic rate indicate that there might be a causality relationship that is associated with both the treatment and the outcome of our experiment. 
+
+- Temperatures are very low at high altitudes and can remain below 0 °C during summer -> Low temperatures are identified as critical limitations to plant biochemical processes and physiological activities (Larcher and Bauer 1981, cited by Zheng et al.,2021).
+
+- Evolutionary theories talk about how environmental conditions lead to speciation throuhg natural selection, highlighting how genetic variation play a role on this process (Stebbins, 1950)
+
+### Why do we want to use PCA (Principal Component Analysis)?
+
+PCA identifies axes of genetic variation (principal components) that capture ancestry. These axes/ancestry often correlate with unmeasured confounders, like in our experiment geographic elevation. By including top PCs as covariates in GWAS, we adjust for latent population structure, reducing spurious SNP-trait associations (Price et al., 2010; National Academies, 2023).
+
+ 🌱 Population Structure 🌱
+
+Population Structure refers all non-random genetic variation across human groups that are shaped by historical demography (e.g., migration, drift, etc) are what defines population structure (Price, A. et al., 2010).  In GWAS, we study the association between certain SNPs to a trait, therefore when we have variation that is connected to a human group, wheather or no there is association with the trait, it Introduces spurious (false) associations between genetic variants and traits (National Academies, 2023; Bryc, K. 2015). This is a current challenge that GWAS tries to address by accounting for it and developing methods that address population structure, family relateness and cryptic relateness (Price, A. et al., 2010).
+
+
+## Exploring the Data
+
+```{r}
+tree_pcadata %>% 
+  group_by(population) %>% 
+  count()
+```
+
+Are there any SNPs that seem to be more common in one population than the other? By how much do the allele frequencies in the two populations differ for each SNP?
+
+# Needs editing - interpret tree_pcadata
+
+::: {.callout-note icon="false" title="Interpretation"}
+Since we are talking about different populations, we do not establish a minor allele, but we can choose a reference allele to make the comparison between the allele frequency in the different SNP's (it would be a different for each SNPs). We observed that Population 2 had a higher frequency of the chosen allele for SNPs that have a higher mean than population 1, and viceversa. The five SNP's are the most different, 2 are very different and the other three are somewhat different.
+:::
+
+## Running PCA
+
+```{r pca-setup}
+tree_geno <- tree_pcadata %>% 
+  select(-population, -trait, -elevation, -elevation_category)
+
+# Run PCA on SNP data
+tree_pca_out <- prcomp(tree_geno, center = TRUE, scale = TRUE)
+```
+
+### Extracting Loadings and Scores
+
+```{r pca-extraction}
+# pull out scores, loadings, and variance
+scores_tree_pca <- tree_pca_out$x
+loadings_tree_pca<- tree_pca_out$rotation
+var_tree_pca <- (tree_pca_out$sdev)^2
+```
+
+::: {.callout-note icon="false" title="Why do we use `prcomp`?"}
+
+prcomp returns a list with class "prcomp" containing the following components:
+
+-   Loadings: rotation
+
+    This is the matrix of variable loadings (eigenvectors). Each column corresponds to a principal component, and each row corresponds to a variable in the original data. These loadings describe how each original variable contributes to the principal components.
+
+-   Scores: x
+
+    This contains the scores for the PCA analysis. These are the coordinates of the observations (samples) in the new principal component space. Each column corresponds to a principal component, and each row corresponds to an observation.
+:::
+\
+
+### Plot Results
+
+#### Scores
+
+```{r plot-scores}
+colnames(scores_tree_pca)
+
+scores_tree_pca %>%
+  as.data.frame() %>% # convert pca_scores into a data frame for plotting
+  mutate(population = as.factor(tree_pcadata$population)) %>%  # add the population labels
+  ggplot(aes(x = PC1, y = PC2, color = population)) + # then plot
+  geom_point() + 
+  scale_color_brewer(palette = 'Dark2')+
+  theme_minimal()
+
+scores_tree_pca %>%
+  as.data.frame() %>% # convert pca_scores into a data frame for plotting
+  mutate(elevation_categorical = as.factor(tree_pcadata$elevation_category)) %>%  # add the population labels
+  ggplot(aes(x = PC1, y = PC2, color = elevation_category)) + # then plot
+  geom_point() + 
+  scale_color_brewer(palette = 'Dark2')+
+  theme_minimal()
+
+```
+
+::: {.callout-note icon="false" title="Interpretation"}
+:::
+
+#### Parallel Coordinates Plot
+
+```{r parallel-coordinates}
+# parallel coordinates plot
+scores_tree_pca %>%
+  as.data.frame() %>%
+  mutate(population = as.factor(tree_pcadata$population)) %>% 
+  ggparcoord(columns = 1:15, groupColumn = 'population', alpha = 0.2) + 
+  theme_minimal() + 
+  scale_color_brewer(palette = 'Dark2')
+```
+
+::: {.callout-note icon="false" title="Interpretation"}
+:::
+
+#### Loadings Plot
+
+```{r}
+pc1_loadings <- tree_pca_out$rotation[, 1]
+
+
+loadings_df <- data.frame(
+  SNP = rownames(tree_pca_out$rotation),  # SNP names
+  Loading = pc1_loadings             # Loadings for PC1
+)
+
+ggplot(loadings_df, aes(x = reorder(SNP, Loading), y = Loading, fill = Loading)) +
+  geom_bar(stat = "identity") +
+  labs(x = "SNP", y = "Loading", title = "Loadings of SNPs for PC1",
+    fill = "Loading"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+::: {.callout-note icon="false" title="WHich SNPs contribute the most to PC1?"}
+
+:::
+
+\
+\
+
+#### Variance Explained
+
+What proportion of total variance each PC explains, we can create what's known as a scree plot. The code chunk below calculates the proportion of variance explained.
+
+```{r}
+
+# calculate proportion of variance explained
+tree_total_var <- sum(var_tree_pca)
+tree_pve <- var_tree_pca/tree_total_var
+```
+
+\
+
+#### Visualizing the Proportion of variance explained compares across the PCs
+
+```{r}
+
+# SNPs
+tree_pve %>%
+  as.data.frame() %>%
+  mutate(index = seq_len(length(var_tree_pca))) %>%
+  ggplot(aes(x = index, y = tree_pve)) + 
+  geom_point() + 
+  geom_line() + 
+  labs(x = 'SNP Number', y = 'Percent of Variance Explained') + 
+  theme_minimal()
+
+# PCs
+
+# Create data frame for plotting
+tree_variance_df <- data.frame(
+  PC = factor(1:length(tree_pve)),
+  Individual = tree_pve,
+  Cumulative = cumsum(tree_pve)
+  )
+
+# Create scree plot
+ggplot(tree_variance_df, aes(x = PC)) +
+  geom_col(aes(y = Individual)) +
+  geom_point(aes(y = Cumulative)) +
+  geom_line(aes(y = Cumulative, group = 1)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Principal Component", y = "Proportion of Variance Explained", title = "Scree Plot with Cumulative Variance") +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank())
+
+
+```
+## What happens if we would have not realized about the confounding on our data?
+
+### Omitted Variable Bias
+
+Reminder: Bias is how long or how far (on average) we are to the "truth".
+
+In this context we are talking about parameters, so...
+
+If $\hat{\theta}$ estimates $\theta$, bias is $E[\hat{\theta}] - \theta$.  
+
+When confounding variables are omitted:  
+- Estimates become biased ($E[\hat{\beta} \neq \beta$)  
+- Variance estimates are also distorted  
+
+#### Expected Value Rules (Probability Foundations):
+
+For random variables $X,Y$ and constants $a,b$ (aka Linearity of Expectation):  
+
+$$
+\begin{aligned}
+E[X + Y] &= E[X] + E[Y] \\  
+E[aX] &= aE[X] \\  
+E[b] &= b  
+\end{aligned}
+$$
+
+
+
+
+#### Proof: OLS Unbiasedness (Correct Model)
+
+**Model**: $y = X\beta + \epsilon$, where $E[\epsilon] = 0$  
+**Estimator**: $\hat{\beta} = (X^TX)^{-1}X^Ty$  
+
+$$
+\begin{align*}
+E[\hat{\beta}] &= E[(X^TX)^{-1}X^Ty] \\  
+&= (X^TX)^{-1}X^TE[y] \quad \text{(Linearity of expectation)} \\  
+&= (X^TX)^{-1}X^T X\beta \quad \text{(Since } E[y] = X\beta) \\  
+&= \beta \quad
+\end{align*}
+$$
+
+#### Proof: OLS Bias (Omitted Variable) <- What would happen to us if we don't think about Elevation!!!
+
+**True Model**: $y = X\beta + Z\gamma + \epsilon$  
+**Fitted Model**: $y = X\beta + \epsilon^*$ (omits $Z$)  
+
+$$
+
+\begin{align*}
+\hat{\beta} &= (X^TX)^{-1}X^Ty \\  
+&= (X^TX)^{-1}X^T(X\beta + Z\gamma + \epsilon) \\  
+&= \beta + (X^TX)^{-1}X^TZ\gamma + (X^TX)^{-1}X^T\epsilon  
+\end{align*}
+$$
+Taking expectations: 
+
+$$
+\begin{align*}
+E[\hat{\beta}] &= \beta + \underbrace{(X^TX)^{-1}X^TZ\gamma}_{\text{Bias term}} \quad \text{(if } X \text{ and } Z \text{ are correlated)} \\  
+E[\hat{\beta}] &\neq \beta \quad 
+\end{align*}
+
+$$
+
+### References:
+
+- National Academies of Sciences, Engineering, and Medicine. 2023. Using Population Descriptors in Genetics and Genomics Research: A New Framework for an Evolving Field. Washington, DC: The National Academies Press. https://doi.org/10.17226/26902.
+- Bryc, K., Durand, E. Y., Macpherson, J. M., Reich, D., & Mountain, J. L. (2015). The Genetic Ancestry of African Americans, Latinos, and European Americans across the United States. The American Journal of Human Genetics, 96(1), 37-53. https://doi.org/10.1016/j.ajhg.2014.11.010
+- Novembre, J., Johnson, T., Bryc, K., Kutalik, Z., Boyko, A. R., Auton, A., Indap, A., King, K. S., Bergmann, S., Nelson, M. R., Stephens, M., & Bustamante, C. D. (2008). Genes mirror geography within Europe. Nature, 456(7218), 98-101. https://doi.org/10.1038/nature07331
+- Price, A. L., Zaitlen, N. A., Reich, D., & Patterson, N. (2010). New approaches to population stratification in genome-wide association studies. Nature Reviews. Genetics, 11(7), 459–463. https://doi.org/10.1038/nrg2813
+- Simonson, T. S., Yang, Y., Huff, C. D., Yun, H., Qin, G., Witherspoon, D. J., Bai, Z., Lorenzo, F. R., Xing, J., Jorde, L. B., Prchal, J. T., & Ge, R. (2010). Genetic Evidence for High-Altitude Adaptation in Tibet. Science, 329(5987), 72-75. https://doi.org/10.1126/science.1189406
+- Stebbins, G. L. (1950). Variation and Evolution in Plants. Columbia University Press. https://doi.org/10.7312/steb94536
+- Zheng, L., Gaire, N. P., & Shi, P. (2021). High-altitude tree growth responses to climate change across the Hindu Kush Himalaya. Journal of Plant Ecology, 14(5), 829-842. https://doi.org/10.1093/jpe/rtab035
+
+
