@@ -28,3 +28,17 @@
     background-color: #3B4D1A; /* Darker olive green for hover */
     color: #FFFFFF !important;
 }
+/* keep content from stretching too wide on big screens */
+.container { max-width: 1100px; }
+
+/* prettier buttons when active */
+#filters .btn.active {
+  color: #fff;
+  background-color: #556B2F;
+  border-color: #556B2F;
+}
+
+/* soft cards */
+.card { border-radius: 1rem; }
+.card-img-top { border-top-left-radius: 1rem; border-top-right-radius: 1rem; }
+.badge { margin-right: .25rem; }

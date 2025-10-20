@@ -1,0 +1,487 @@
+---
+title: "Final Field Gas Data Processing"
+author: "Nibia Becerra Santillan"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+categories: [R]
+description: "Pipeline for field gas fluxes with tidyverse and QC checks."
+date: 2025-04-29
+---
+
+## Load Packages
+
+```{r setup}
+library(tidyverse)
+library(forcats)
+library(lubridate)
+library(plotly)
+library(knitr)
+```
+
+## Run the data
+
+```{r}
+ALLfluxData <- read_csv('./AllDataNIBIASummer23.csv') 
+stopifnot(file.exists('./AllDataNIBIASummer23.csv'))
+
+fluxData <- ALLfluxData[3:321,]
+head(fluxData)
+str(fluxData)
+```
+
+```{r}
+colnames(fluxData) <- c("DateTime", "LABEL", "Temp", "FCH4_DRY_LIN", "FCH4_DRY_LIN_R2", "FCO2_DRY_LIN", "FCO2_DRY_LIN_R2", "COLLAR_HEIGHT", "SoilMoist_mean")
+
+colnames(fluxData)
+str(fluxData)
+```
+
+## Clean the data
+
+```{r}
+
+# wrangling
+fluxData$Temp <- gsub(",", "", fluxData$Temp)
+fluxData$FCH4_DRY_LIN <- gsub(",", "", fluxData$FCH4_DRY_LIN)
+fluxData$FCH4_DRY_LIN_R2 <- gsub(",", "", fluxData$FCH4_DRY_LIN_R2)
+fluxData$FCO2_DRY_LIN <- gsub(",", "", fluxData$FCO2_DRY_LIN)
+fluxData$FCO2_DRY_LIN_R2 <- gsub(",", "", fluxData$FCO2_DRY_LIN_R2)
+fluxData$COLLAR_HEIGHT <- gsub(",", "", fluxData$COLLAR_HEIGHT)
+fluxData$SoilMoist_mean<- gsub(",", "", fluxData$SoilMoist_mean)
+
+
+fluxData$Temp <- as.numeric(fluxData$Temp)
+fluxData$FCH4_DRY_LIN <- as.numeric(fluxData$FCH4_DRY_LIN)
+fluxData$FCH4_DRY_LIN_R2<- as.numeric(fluxData$FCH4_DRY_LIN_R2)
+fluxData$FCO2_DRY_LIN <- as.numeric(fluxData$FCO2_DRY_LIN)
+fluxData$FCO2_DRY_LIN_R2 <- as.numeric(fluxData$FCO2_DRY_LIN_R2)
+fluxData$COLLAR_HEIGHT<- as.numeric(fluxData$COLLAR_HEIGHT)
+fluxData$SoilMoist_mean  <- as.numeric(fluxData$SoilMoist_mean)
+
+
+str(fluxData)
+head(fluxData)
+```
+
+```{r}
+fluxData$DateTime_chr <- fluxData$DateTime
+fluxData$DateTime <- ymd_hms(fluxData$DateTime)
+```
+
+```{r}
+# data filtered based on R square values for CH4 flux
+thresholdCH4 <- 0.2
+filtered_fluxData <- fluxData %>%
+  filter(FCH4_DRY_LIN_R2 > thresholdCH4)
+
+# data filtered based on R square values for CO2 flux
+thresholdCO2 <- 0.9
+filtered_fluxData <- filtered_fluxData %>%
+  filter(FCO2_DRY_LIN_R2 > thresholdCO2)
+
+# data filtered based on Soil Moisture
+filtered_fluxData <- filtered_fluxData %>%
+  filter(SoilMoist_mean >= 0 & SoilMoist_mean <= 1 & SoilMoist_mean != -9999)
+
+head(filtered_fluxData)
+```
+
+```{r}
+
+filtered_fluxData <- filter(filtered_fluxData, !grepl("wrong", LABEL))
+
+```
+
+```{r}
+# change col names
+filtered_fluxData$plot <- substr(filtered_fluxData$LABEL, 1, 2)
+filtered_fluxData$collar <- substr(filtered_fluxData$LABEL, 3, 4)
+filtered_fluxData$treatment <- substr(filtered_fluxData$LABEL, 3, 3)
+filtered_fluxData$wet_up_stage <- as.numeric(substr(filtered_fluxData$LABEL, 6, 6))
+filtered_fluxData$plot_treatment <- substr(filtered_fluxData$LABEL, 1, 3)
+
+
+str(filtered_fluxData)
+head(filtered_fluxData)
+
+# find how differences in moisture depending on the measuring site
+filtered_fluxData %>%
+  group_by(plot) %>%
+  summarize(SoilMoisture = mean(SoilMoist_mean))
+
+filtered_fluxData %>%
+  group_by(plot_treatment) %>%
+  summarize(SoilMoisture = mean(SoilMoist_mean), sd_SM = sd(SoilMoist_mean))
+```
+
+## Making the means
+
+```{r}
+
+summarytable_plot_treatment_measurement <- filtered_fluxData %>%
+  group_by(plot, treatment, wet_up_stage) %>%
+  summarize(mean_CO2_flux = mean(FCO2_DRY_LIN, na.rm = TRUE),
+            mean_CH4_flux = mean(FCH4_DRY_LIN, na.rm = TRUE),
+            sd_CO2_flux = sd(FCO2_DRY_LIN, na.rm = TRUE),
+            sd_CH4_flux = sd(FCH4_DRY_LIN, na.rm = TRUE),
+            stderr_CO2_flux = sd(FCO2_DRY_LIN, na.rm = TRUE) / sqrt(n()),
+            stderr_CH4_flux = sd(FCH4_DRY_LIN, na.rm = TRUE) / sqrt(n()),
+            mean_soil_VWC = mean(SoilMoist_mean, na.rm = TRUE),
+            sd_soil_VWC = sd(SoilMoist_mean, na.rm = TRUE),
+            date_time = DateTime)
+
+summarytable_plot_treatment_measurement
+```
+
+```{r}
+# colors consistent with the incubation experiment colors
+
+custom_colors <- c("P1" = "#92c5de", "P5" = "#0571b0")
+line_types <- c("C" = "solid", "E" = "dotted")
+
+summarytable_plot_treatment_measurement <- summarytable_plot_treatment_measurement %>% 
+  mutate(
+    plot = as.factor(plot),
+    treatment = as.factor(treatment),
+    wet_up_stage = as.factor(wet_up_stage)
+  )
+
+
+CO2_TURNED_plot <- ggplot(summarytable_plot_treatment_measurement, aes(x = wet_up_stage, y = mean_CO2_flux, color = plot, linetype = treatment, group = interaction(plot, treatment))) +
+  geom_line(linewidth = 1) +
+  geom_point()+
+  geom_errorbar(aes(ymin = mean_CO2_flux - stderr_CO2_flux, ymax = mean_CO2_flux + stderr_CO2_flux), width = 0.25) +
+  scale_color_manual(values = custom_colors, name = "Plot") +
+  scale_linetype_manual(values = line_types, name = "Treatment") +
+  scale_x_discrete(
+    labels = c("0 min", "2 min", "30 min", "8 hr", "24 hr")
+  ) +
+  labs(x = "Wet up stage", y = "Mean CO₂ Flux (µmol m⁻² s⁻¹)", title = "Mean CO₂ Flux Per Wet Up Stage based on treatment group") +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Tilt labels to the side
+  )
+
+CO2_TURNED_plot
+
+
+# ggsave(
+#   filename = "FIELD_CO2_ActualData_plot.png",
+#   plot = CO2_TURNED_plot,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/",
+#   width = 8,    
+#   height = 6,  
+#   dpi = 300    
+# )
+```
+
+### Graph just for data exploration
+
+```{r}
+
+time_map <- c("1" = 0, "2" = 2, "3" = 30, "4" = 480, "5" = 1440) 
+
+# making new means
+summarytable_plot_treatment_measurement <- summarytable_plot_treatment_measurement %>%
+  mutate(
+    plot = factor(plot),
+    treatment = factor(treatment),
+    wet_up_stage = factor(wet_up_stage),
+    time_min = as.numeric(recode(wet_up_stage, !!!time_map))  # new x-axis
+  )
+
+
+CO2_TURNED_plot <- ggplot(summarytable_plot_treatment_measurement, aes(x = time_min, y = mean_CO2_flux,
+                                                                        color = plot, linetype = treatment)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = mean_CO2_flux - stderr_CO2_flux,
+                    ymax = mean_CO2_flux + stderr_CO2_flux), width = 50) +
+  scale_color_manual(values = custom_colors, name = "Plot") +
+  scale_linetype_manual(values = line_types, name = "Treatment") +
+  scale_x_continuous(
+    name = "Time Since Wet-up (minutes)",
+    breaks = c(0, 2, 30, 480, 1440),
+    labels = c("0 min", "2 min", "30 min", "8 hr", "24 hr")
+  ) +
+  labs(
+    y = "Mean CO₂ Flux (µmol m⁻² s⁻¹)",
+    title = "Mean CO₂ Flux over Time Since Wet-up"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+
+CO2_TURNED_plot
+
+```
+
+## CO2 Two way ANOVA
+
+```{r}
+anova_result <- aov(mean_CO2_flux ~ plot + treatment + plot * wet_up_stage + treatment * wet_up_stage, data = summarytable_plot_treatment_measurement)
+
+summary(anova_result)
+
+# residuals normality
+shapiro.test(residuals(anova_result))
+
+# Post-hoc test (Tukey's HSD)
+TukeyHSD(anova_result)
+```
+
+# CO2
+
+## Final Mixed effects model
+
+```{r}
+library(lme4)
+library(emmeans)
+
+filtered_fluxData$wet_up_stage <- factor(filtered_fluxData$wet_up_stage)
+filtered_fluxData$Date <- as.Date(filtered_fluxData$DateTime)
+filtered_fluxData_no_PREWET<- filtered_fluxData %>% 
+  filter(wet_up_stage != "1")
+
+
+model_fulldata_collar_CO2 <- lmer(FCO2_DRY_LIN ~  plot * treatment * wet_up_stage + (1 | plot/collar) + (1 | Date), 
+                       data = filtered_fluxData_no_PREWET)
+summary(model_fulldata_collar_CO2)
+```
+
+# Interaction terms analysis
+
+```{r}
+emm_CO2 <- emmeans(model_fulldata_collar_CO2, ~ treatment * wet_up_stage * plot)
+contrast(emm_CO2, interaction = TRUE, adjust = "sidak")
+
+```
+
+### Is P1 mean CO2 higher than P5?
+
+```{r}
+emmeans(model_fulldata_collar_CO2, ~ treatment * wet_up_stage * plot)
+contrast(emm_CO2, interaction = TRUE, adjust = "sidak")
+```
+
+# CH4
+
+# Graph
+
+```{r}
+CH4_TURNED_plot <- ggplot(summarytable_plot_treatment_measurement, aes(x = wet_up_stage, y = mean_CH4_flux, color = plot, linetype = treatment, group = interaction(plot, treatment))) +
+  geom_line(linewidth = 1) +
+  geom_point()+
+  geom_errorbar(aes(ymin = mean_CH4_flux - stderr_CH4_flux, ymax = mean_CH4_flux + stderr_CH4_flux), width = 0.25) +
+  scale_color_manual(values = custom_colors, name = "Plot") +
+  scale_linetype_manual(values = line_types, name = "Treatment") +
+  scale_x_discrete(
+    labels = c("0 min", "2 min", "30 min", "8 hr", "24 hr")
+  ) +
+  labs(x = "Wet up stage", y = "Mean CH₄ Flux (µmol m⁻² s⁻¹)", title = "Mean CO₄ Flux Per Wet Up Stage based on treatment group") +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Tilt labels to the side
+  )
+
+CH4_TURNED_plot
+
+
+# ggsave(
+#   filename = "FIELD_CH4_ActualData_plot.png",
+#   plot = CH4_TURNED_plot,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/",
+#   width = 8,    
+#   height = 6,  
+#   dpi = 300     
+# )
+
+```
+
+# Final Mixed effects model
+
+```{r}
+model_fulldata_collar_CH4 <- lmer(FCH4_DRY_LIN ~ plot * treatment * wet_up_stage + (1 | plot/collar) + (1 | Date),
+                       data = filtered_fluxData_no_PREWET)
+
+summary(model_fulldata_collar_CH4)
+```
+
+# Interaction terms analysis
+
+```{r}
+emm_CH4 <- emmeans(model_fulldata_collar_CH4, ~ treatment * wet_up_stage * plot)
+contrast(emm_CH4, interaction = TRUE, adjust = "sidak")
+
+```
+
+# Change in CO2 and CH4 over time: Making variables
+
+```{r}
+baseline_values <- filtered_fluxData %>% 
+  filter(wet_up_stage == "1") %>% 
+  group_by(plot, treatment) %>% 
+  summarize(
+    baselineCO2 = mean(FCO2_DRY_LIN),
+    baselineCH4 = mean(FCH4_DRY_LIN),
+    se_baselineCO2 = sd(FCO2_DRY_LIN) / sqrt(n()),
+    se_baselineCH4 = sd(FCH4_DRY_LIN) / sqrt(n()),
+    .groups = "drop"
+  )
+
+# do the subtraction
+filtered_fluxData_diff <- left_join(filtered_fluxData, baseline_values, by = c("plot", "treatment"))
+  
+filtered_fluxData_diff <- filtered_fluxData_diff %>% 
+   mutate(
+      difference_CH4 = FCH4_DRY_LIN - baselineCH4,
+      difference_CO2 = FCO2_DRY_LIN - baselineCO2)
+ 
+
+# Making the means of differences
+meanDiff_CO2 <- filtered_fluxData_diff  %>%
+  group_by(plot, treatment, wet_up_stage) %>%
+  summarize(mean_CO2_fluxDiff = mean(difference_CO2, na.rm = TRUE),
+            stderr_CO2_fluxDiff = sd(difference_CO2, na.rm = TRUE) / sqrt(n()))
+
+meanDiff_CH4 <- filtered_fluxData_diff  %>%
+  group_by(plot, treatment, wet_up_stage) %>%
+  summarize(mean_CH4_fluxDiff = mean(difference_CH4, na.rm = TRUE),
+            stderr_CH4_fluxDiff = sd(difference_CH4, na.rm = TRUE) / sqrt(n()))
+            
+meanDiff_CH4
+```
+
+# Change in CO2 and CH4 over time: Graphing
+
+```{r}
+Mean_Difference_CH4Graph <- ggplot(meanDiff_CH4, aes(x = wet_up_stage, y = mean_CH4_fluxDiff, color = plot, linetype = treatment, group = interaction(plot, treatment))) +
+  geom_point(size = 3) +
+  geom_line() +
+  geom_errorbar(aes(ymin = mean_CH4_fluxDiff - stderr_CH4_fluxDiff, 
+                    ymax = mean_CH4_fluxDiff + stderr_CH4_fluxDiff),
+                width = 0.2) +
+  scale_color_manual(values = custom_colors, name = "Plot") +
+  scale_linetype_manual(values = line_types, name = "Treatment") +
+  scale_x_discrete(
+    labels = c("0 min", "2 min", "30 min", "8 hr", "24 hr")
+  ) +
+  labs(x = "Wet up stage", y = "Mean CH₄ Flux (µmol m⁻² s⁻¹)", title = "Mean CH₄ Flux Per Wet Up Stage based on treatment group") +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)  
+  )
+
+
+Mean_Difference_CH4Graph
+
+# ggsave(
+#   filename = "Mean_Difference_CH4Graph.png",
+#   plot = Mean_Difference_CH4Graph,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures",
+#   width = 8,    
+#   height = 6,  
+#   dpi = 300    
+# )
+
+```
+
+```{r}
+Mean_Difference_CO2Graph <- ggplot(meanDiff_CO2, aes(x = wet_up_stage, y = mean_CO2_fluxDiff, color = plot, linetype = treatment, group = interaction(plot, treatment))) +
+  geom_point(size = 3) +
+  geom_line() +
+  geom_errorbar(aes(ymin = mean_CO2_fluxDiff - stderr_CO2_fluxDiff, 
+                    ymax = mean_CO2_fluxDiff + stderr_CO2_fluxDiff),
+                width = 0.2) +
+  scale_color_manual(values = custom_colors, name = "Plot") +
+  scale_linetype_manual(values = line_types, name = "Treatment") +
+  scale_x_discrete(
+    labels = c("0 min", "2 min", "30 min", "8 hr", "24 hr")
+  ) +
+  labs(x = "Wet up stage", y = "Mean CO₂ Flux (µmol m⁻² s⁻¹)", title = "Mean CO₂ Flux Per Wet Up Stage based on treatment group") +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)  
+  )
+
+
+Mean_Difference_CO2Graph
+```
+
+# both plots together
+
+```{r}
+library(patchwork)
+FIELD_Mean_differences <- Mean_Difference_CO2Graph/Mean_Difference_CH4Graph
+FIELD_Mean_differences
+# ggsave(
+#   filename = "FIELD_Mean_differences.png",
+#   plot = FIELD_Mean_differences,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures",
+#   width = 10,    
+#   height = 8,   
+#   dpi = 300    
+# )
+```
+
+# Timeseries per date
+
+```{r}
+
+Field_WETUP_C02_timeseries <- ggplot(summarytable_plot_treatment_measurement, 
+       aes(x = date_time, y = mean_CO2_flux, 
+           group = interaction(plot, treatment),
+           color = plot,
+           linetype = treatment)) +
+  geom_point(size = 3) +
+  geom_line()+
+  geom_errorbar(aes(ymin = mean_CO2_flux - stderr_CO2_flux, 
+                    ymax = mean_CO2_flux + stderr_CO2_flux,
+                    color = plot,
+                    linetype = treatment), width = 0.5) +
+  scale_color_manual(values = custom_colors, name = "Plot") +
+  scale_linetype_manual(values = line_types, name = "Treatment") +
+  labs(
+    title = "CO₂ Flux Over Time by Treatment",
+    x = "Date", 
+    y = "Mean CO₂ Flux ± SE"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)  
+  ) 
+
+Field_WETUP_C02_timeseries
+
+```

@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Nibia Becerra Santillan">
+<meta name="dcterms.date" content="2025-04-29">
+<meta name="description" content="Pipeline for lab gas fluxes with tidyverse and QC checks.">
+
+<title>Final Lab Gas Data Processing – Nibia</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Nibia</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./projects.html"> 
+<span class="menu-text">Projects Overview</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-air-data-processing-and-visualizations" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Air Data Processing and Visualizations</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-air-data-processing-and-visualizations">    
+        <li>
+    <a class="dropdown-item" href="./LabGas.html">
+ <span class="dropdown-text">Laboratory Gas Data Processing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./FieldGas.qmd">
+ <span class="dropdown-text">Field Gas Data Processing</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-data-science-projects" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Data Science Projects</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-data-science-projects">    
+        <li>
+    <a class="dropdown-item" href="./DiD_ColombiaVenezuela.html">
+ <span class="dropdown-text">Difference in Difference</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./LDA_thematic_analysis/Report.html">
+ <span class="dropdown-text">LDA thematic analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./Clustering.html">
+ <span class="dropdown-text">Clustering</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-stat-content-summary" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">STAT Content Summary</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-stat-content-summary">    
+        <li>
+    <a class="dropdown-item" href="./Content_Summary.html">
+ <span class="dropdown-text">Intro to GWAS</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./ContentSummary2forreal.html">
+ <span class="dropdown-text">PCA for GWAS</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="mailto:nibiab.work@gmail.com"> <i class="bi bi-envelope" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/nibia-becerra-santillan/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text">LinkedIn</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#reading-data" id="toc-reading-data" class="nav-link active" data-scroll-target="#reading-data">Reading data</a></li>
+  <li><a href="#treatment-assignmnet-from-jarid" id="toc-treatment-assignmnet-from-jarid" class="nav-link" data-scroll-target="#treatment-assignmnet-from-jarid">Treatment assignmnet from JarID</a></li>
+  <li><a href="#fix-dates" id="toc-fix-dates" class="nav-link" data-scroll-target="#fix-dates">Fix Dates</a></li>
+  <li><a href="#means-of-fluxes-no-wet-up" id="toc-means-of-fluxes-no-wet-up" class="nav-link" data-scroll-target="#means-of-fluxes-no-wet-up">Means of Fluxes No WET UP</a></li>
+  <li><a href="#colors-and-lines" id="toc-colors-and-lines" class="nav-link" data-scroll-target="#colors-and-lines">Colors and lines</a></li>
+  <li><a href="#antecedent-data" id="toc-antecedent-data" class="nav-link" data-scroll-target="#antecedent-data">Antecedent Data</a></li>
+  <li><a href="#co2" id="toc-co2" class="nav-link" data-scroll-target="#co2">CO2</a></li>
+  <li><a href="#timeseries-graph" id="toc-timeseries-graph" class="nav-link" data-scroll-target="#timeseries-graph">Timeseries Graph</a></li>
+  <li><a href="#mixed-model-effect" id="toc-mixed-model-effect" class="nav-link" data-scroll-target="#mixed-model-effect">Mixed Model effect</a>
+  <ul class="collapse">
+  <li><a href="#making-phase" id="toc-making-phase" class="nav-link" data-scroll-target="#making-phase">Making “Phase”</a></li>
+  </ul></li>
+  <li><a href="#timeseries-graph-1" id="toc-timeseries-graph-1" class="nav-link" data-scroll-target="#timeseries-graph-1">Timeseries graph</a></li>
+  <li><a href="#mixed-model-effect-1" id="toc-mixed-model-effect-1" class="nav-link" data-scroll-target="#mixed-model-effect-1">Mixed Model effect</a>
+  <ul class="collapse">
+  <li><a href="#making-phase-1" id="toc-making-phase-1" class="nav-link" data-scroll-target="#making-phase-1">Making “Phase”</a></li>
+  </ul></li>
+  <li><a href="#wetup" id="toc-wetup" class="nav-link" data-scroll-target="#wetup">WETUP</a>
+  <ul class="collapse">
+  <li><a href="#adding-a-wet-up-stage-column" id="toc-adding-a-wet-up-stage-column" class="nav-link" data-scroll-target="#adding-a-wet-up-stage-column">Adding a wet up stage column</a></li>
+  <li><a href="#filtering" id="toc-filtering" class="nav-link" data-scroll-target="#filtering">Filtering</a></li>
+  <li><a href="#co2-wet-up-graph" id="toc-co2-wet-up-graph" class="nav-link" data-scroll-target="#co2-wet-up-graph">CO2 WET UP Graph</a></li>
+  </ul></li>
+  <li><a href="#mixed-effects-model" id="toc-mixed-effects-model" class="nav-link" data-scroll-target="#mixed-effects-model">Mixed effects model</a>
+  <ul class="collapse">
+  <li><a href="#ch4" id="toc-ch4" class="nav-link" data-scroll-target="#ch4">CH4</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Final Lab Gas Data Processing</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">R</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Pipeline for lab gas fluxes with tidyverse and QC checks.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Nibia Becerra Santillan </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 29, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="reading-data" class="level1">
+<h1>Reading data</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fluxData <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"./results_combo_FINAL_FLUXES_Correct.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="treatment-assignmnet-from-jarid" class="level1">
+<h1>Treatment assignmnet from JarID</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fluxData_treatment_three_jars <span class="ot">&lt;-</span> fluxData <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment =</span> <span class="fu">case_when</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      JarID <span class="sc">==</span> <span class="st">"BLANK"</span> <span class="sc">~</span> <span class="st">"BLANK"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">1</span>, <span class="dv">3</span>) <span class="sc">~</span> <span class="st">"90-25"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">7</span>, <span class="dv">9</span>) <span class="sc">~</span> <span class="st">"50-25"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">13</span>, <span class="dv">15</span>) <span class="sc">~</span> <span class="st">"20-25"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">19</span>, <span class="dv">21</span>) <span class="sc">~</span> <span class="st">"90-35"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">25</span>, <span class="dv">27</span>) <span class="sc">~</span> <span class="st">"50-35"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">31</span>, <span class="dv">33</span>) <span class="sc">~</span> <span class="st">"20-35"</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    )) </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>fluxData_treatment_six_jars <span class="ot">&lt;-</span> fluxData <span class="sc">%&gt;%</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment =</span> <span class="fu">case_when</span>(</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>      JarID <span class="sc">==</span> <span class="st">"BLANK"</span> <span class="sc">~</span> <span class="st">"BLANK"</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">1</span>, <span class="dv">6</span>) <span class="sc">~</span> <span class="st">"90-25"</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">7</span>, <span class="dv">12</span>) <span class="sc">~</span> <span class="st">"50-25"</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">13</span>, <span class="dv">18</span>) <span class="sc">~</span> <span class="st">"20-25"</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">19</span>, <span class="dv">24</span>) <span class="sc">~</span> <span class="st">"90-35"</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">25</span>, <span class="dv">30</span>) <span class="sc">~</span> <span class="st">"50-35"</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">between</span>(<span class="fu">as.numeric</span>(JarID), <span class="dv">31</span>, <span class="dv">36</span>) <span class="sc">~</span> <span class="st">"20-35"</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span> </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="fix-dates" class="level1">
+<h1>Fix Dates</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Three jars</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>flux_three_jars <span class="ot">&lt;-</span> fluxData_treatment_three_jars  <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Dateflux =</span> fluxData_treatment_three_jars<span class="sc">$</span>Date) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date_corr =</span> <span class="fu">mdy</span>(Dateflux))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Six jars</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>flux_six_jars <span class="ot">&lt;-</span> fluxData_treatment_six_jars <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Dateflux =</span> fluxData_treatment_six_jars<span class="sc">$</span>Date) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date_corr =</span> <span class="fu">mdy</span>(Dateflux))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="means-of-fluxes-no-wet-up" class="level1">
+<h1>Means of Fluxes No WET UP</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>NO_WETUP_six <span class="ot">&lt;-</span> flux_six_jars<span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date_corr <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2024-07-16"</span>, <span class="st">"2024-07-17"</span>, <span class="st">"2024-07-20"</span>, <span class="st">"2024-07-22"</span>, <span class="st">"2024-07-23"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(treatment, Date_corr) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_CO2 =</span> <span class="fu">mean</span>(finalC02_flux),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_CO2 =</span> <span class="fu">sd</span>(finalC02_flux),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_CO2 =</span> sd_CO2 <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">n</span>()),  <span class="co"># Standard error for CO2</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_CH4 =</span> <span class="fu">mean</span>(finalCH4_flux),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_CH4 =</span> <span class="fu">sd</span>(finalCH4_flux),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_CH4 =</span> sd_CH4 <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">n</span>()),  <span class="co"># Standard error for CH4</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate</span>(treatment, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"WHC"</span>, <span class="st">"Temperature"</span>), <span class="at">remove =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">WHC =</span> <span class="fu">factor</span>(WHC, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"20"</span>, <span class="st">"50"</span>, <span class="st">"90"</span>)),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Temperature =</span> <span class="fu">factor</span>(Temperature, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"25"</span>, <span class="st">"35"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="colors-and-lines" class="level1">
+<h1>Colors and lines</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>custom_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"20"</span> <span class="ot">=</span> <span class="st">"#a6611a"</span>, <span class="st">"50"</span> <span class="ot">=</span> <span class="st">"#92c5de"</span>, <span class="st">"90"</span> <span class="ot">=</span> <span class="st">"#0571b0"</span>, <span class="st">"NA"</span><span class="ot">=</span> <span class="st">"grey3"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>line_types <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"25"</span> <span class="ot">=</span> <span class="st">"solid"</span>, <span class="st">"35"</span> <span class="ot">=</span> <span class="st">"dotted"</span>, <span class="st">"30"</span> <span class="ot">=</span> <span class="st">"longdash"</span>, <span class="st">"NA"</span><span class="ot">=</span> <span class="st">"solid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="antecedent-data" class="level1">
+<h1>Antecedent Data</h1>
+</section>
+<section id="co2" class="level1">
+<h1>CO2</h1>
+</section>
+<section id="timeseries-graph" class="level1">
+<h1>Timeseries Graph</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>NO_WETUP_C02_timeseries <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(NO_WETUP_six, </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Date_corr, <span class="at">y =</span> mean_CO2, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">group =</span> treatment,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> WHC,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">linetype =</span> Temperature)) <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add shading for stages</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-16"</span>) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">xmax =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-17"</span>) <span class="sc">+</span> <span class="fl">0.5</span> , <span class="at">ymin =</span>  <span class="dv">0</span>, <span class="at">ymax =</span> <span class="cn">Inf</span>), </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">fill =</span> <span class="st">"#e6ecef"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-20"</span>) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">xmax =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-23"</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> <span class="cn">Inf</span>), </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">fill =</span> <span class="st">"#efe8e6"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_CO2 <span class="sc">-</span> se_CO2, </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> mean_CO2 <span class="sc">+</span> se_CO2,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">color =</span> WHC,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                    <span class="at">linetype =</span> Temperature),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> custom_colors, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> line_types, <span class="at">name =</span> <span class="st">"Temperature"</span>) <span class="sc">+</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">breaks =</span> <span class="fu">unique</span>(NO_WETUP_six<span class="sc">$</span>Date_corr), </span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>               <span class="at">date_labels =</span> <span class="st">"%d %b</span><span class="sc">\n</span><span class="st">%Y"</span>) <span class="sc">+</span>  <span class="co"># Day as number, abbreviated month, and year below</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"CO₂ Flux Over Time by Treatment"</span>,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>, </span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean CO₂ Flux ± SE"</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)  <span class="co"># Tilt labels to the side</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-16"</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">2.3e-8</span>, <span class="at">label =</span> <span class="st">"Only moisture"</span>, <span class="at">color =</span> <span class="st">"#4d4c4c"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-20"</span>) <span class="sc">+</span> <span class="fl">1.5</span>, <span class="at">y =</span> <span class="fl">2.3e-8</span>, <span class="at">label =</span> <span class="st">"Moisture and Temperature"</span>, <span class="at">color =</span> <span class="st">"#4d4c4c"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, , <span class="at">size =</span> <span class="dv">3</span>)</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>NO_WETUP_C02_timeseries</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LabGas_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave(</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filename = "LAB_C02_ActualData.png",</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   plot = NO_WETUP_C02_timeseries,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   width = 8,    # adjust width as needed</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   height = 6,   # adjust height as needed</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   dpi = 300     # adjust dpi for resolution</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="mixed-model-effect" class="level1">
+<h1>Mixed Model effect</h1>
+<section id="making-phase" class="level2">
+<h2 class="anchored" data-anchor-id="making-phase">Making “Phase”</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>flux_six_jars  <span class="ot">&lt;-</span> flux_six_jars  <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">phase =</span> <span class="fu">ifelse</span>(Date_corr <span class="sc">%in%</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">"2024-07-16"</span>, <span class="st">"2024-07-17"</span>)), <span class="st">"MoistureOnly"</span>, <span class="st">"Moisture+Temp"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">phase =</span> <span class="fu">as.factor</span>(phase))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>m4_phase_CO2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(finalC02_flux <span class="sc">~</span> treatment <span class="sc">*</span> phase <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>JarID), </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> flux_six_jars, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">na.action =</span> na.omit)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m4_phase_CO2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: finalC02_flux ~ treatment * phase + (1 | JarID)
+   Data: flux_six_jars
+
+REML criterion at convergence: -12180.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0313 -0.3593 -0.0071  0.4020  3.7974 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. 
+ JarID    (Intercept) 3.010e-18 1.735e-09
+ Residual             1.465e-17 3.828e-09
+Number of obs: 353, groups:  JarID, 36
+
+Fixed effects:
+                                   Estimate Std. Error t value
+(Intercept)                       2.765e-09  9.253e-10   2.989
+treatment20-35                    1.841e-09  1.308e-09   1.408
+treatment50-25                    4.604e-09  1.299e-09   3.544
+treatment50-35                    9.122e-09  1.303e-09   6.999
+treatment90-25                   -2.876e-10  1.299e-09  -0.221
+treatment90-35                    3.539e-09  1.302e-09   2.718
+phaseMoistureOnly                 3.529e-10  1.255e-09   0.281
+treatment20-35:phaseMoistureOnly -1.563e-09  1.775e-09  -0.881
+treatment50-25:phaseMoistureOnly  1.608e-09  1.768e-09   0.910
+treatment50-35:phaseMoistureOnly -3.474e-09  1.771e-09  -1.961
+treatment90-25:phaseMoistureOnly  1.447e-09  1.768e-09   0.818
+treatment90-35:phaseMoistureOnly -1.700e-09  1.770e-09  -0.960
+
+Correlation of Fixed Effects:
+            (Intr) tr20-35 tr50-25 tr50-35 tr90-25 tr90-35 phsMsO t20-35:
+trtmnt20-35 -0.707                                                       
+trtmnt50-25 -0.712  0.504                                                
+trtmnt50-35 -0.710  0.502   0.506                                        
+trtmnt90-25 -0.712  0.504   0.507   0.506                                
+trtmnt90-35 -0.711  0.503   0.506   0.504   0.506                        
+phsMstrOnly -0.305  0.216   0.217   0.217   0.217   0.217                
+trt20-35:MO  0.216 -0.305  -0.154  -0.153  -0.154  -0.153  -0.707        
+trt50-25:MO  0.217 -0.153  -0.298  -0.154  -0.154  -0.154  -0.710  0.502 
+trt50-35:MO  0.216 -0.153  -0.154  -0.301  -0.154  -0.154  -0.709  0.501 
+trt90-25:MO  0.217 -0.153  -0.154  -0.154  -0.298  -0.154  -0.710  0.502 
+trt90-35:MO  0.216 -0.153  -0.154  -0.154  -0.154  -0.300  -0.709  0.501 
+            t50-25: t50-35: t90-25:
+trtmnt20-35                        
+trtmnt50-25                        
+trtmnt50-35                        
+trtmnt90-25                        
+trtmnt90-35                        
+phsMstrOnly                        
+trt20-35:MO                        
+trt50-25:MO                        
+trt50-35:MO  0.503                 
+trt90-25:MO  0.504   0.503         
+trt90-35:MO  0.503   0.502   0.503 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interactions</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>emm_CO2 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m4_phase_CO2, <span class="sc">~</span> treatment <span class="sc">*</span> phase)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">contrast</span>(emm_CO2, <span class="at">interaction =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"sidak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> treatment_eff  phase_eff               estimate       SE  df t.ratio p.value
+ (20-25) effect (Moisture+Temp) effect -3.07e-10 5.73e-10 319  -0.535  1.0000
+ (20-35) effect (Moisture+Temp) effect  4.75e-10 5.73e-10 317   0.829  0.9981
+ (50-25) effect (Moisture+Temp) effect -1.11e-09 5.69e-10 317  -1.952  0.4722
+ (50-35) effect (Moisture+Temp) effect  1.43e-09 5.71e-10 316   2.505  0.1426
+ (90-25) effect (Moisture+Temp) effect -1.03e-09 5.69e-10 317  -1.810  0.5881
+ (90-35) effect (Moisture+Temp) effect  5.43e-10 5.70e-10 318   0.952  0.9934
+ (20-25) effect MoistureOnly effect     3.07e-10 5.73e-10 319   0.535  1.0000
+ (20-35) effect MoistureOnly effect    -4.75e-10 5.73e-10 317  -0.829  0.9981
+ (50-25) effect MoistureOnly effect     1.11e-09 5.69e-10 317   1.952  0.4722
+ (50-35) effect MoistureOnly effect    -1.43e-09 5.71e-10 316  -2.505  0.1426
+ (90-25) effect MoistureOnly effect     1.03e-09 5.69e-10 317   1.810  0.5881
+ (90-35) effect MoistureOnly effect    -5.43e-10 5.70e-10 318  -0.952  0.9934
+
+Degrees-of-freedom method: kenward-roger 
+P value adjustment: sidak method for 12 tests </code></pre>
+</div>
+</div>
+<p>#CH4</p>
+</section>
+</section>
+<section id="timeseries-graph-1" class="level1">
+<h1>Timeseries graph</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># All in the same plot</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>NO_WETUP_CH4_timeseries <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(NO_WETUP_six, </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Date_corr, <span class="at">y =</span> mean_CH4, </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">group =</span> treatment,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> WHC,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">linetype =</span> Temperature)) <span class="sc">+</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-16"</span>) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">xmax =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-17"</span>) <span class="sc">+</span> <span class="fl">0.5</span> , <span class="at">ymin =</span>  <span class="sc">-</span><span class="fl">1e-9</span>, <span class="at">ymax =</span> <span class="cn">Inf</span>), </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">fill =</span> <span class="st">"#e6ecef"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-20"</span>) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">xmax =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-23"</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">ymin =</span> <span class="sc">-</span><span class="fl">1e-9</span>, <span class="at">ymax =</span> <span class="cn">Inf</span>), </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">fill =</span> <span class="st">"#efe8e6"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_CH4 <span class="sc">-</span> sd_CH4, </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> mean_CH4 <span class="sc">+</span> sd_CH4,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">color =</span> WHC,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>                    <span class="at">linetype =</span> Temperature),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> custom_colors, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> line_types, <span class="at">name =</span> <span class="st">"Temperature"</span>) <span class="sc">+</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">breaks =</span> <span class="fu">unique</span>(NO_WETUP_six<span class="sc">$</span>Date_corr), </span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>               <span class="at">date_labels =</span> <span class="st">"%d %b</span><span class="sc">\n</span><span class="st">%Y"</span>) <span class="sc">+</span> </span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"CH4 Flux Over Time by Treatment"</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>, </span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean CH4 Flux ± SD"</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">+</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-16"</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">7.5e-9</span> , <span class="at">label =</span> <span class="st">"Only Moisture"</span>, <span class="at">color =</span> <span class="st">"#4d4c4c"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-20"</span>)<span class="sc">+</span> <span class="fl">1.5</span> , <span class="at">y =</span> <span class="fl">7.5e-9</span>, <span class="at">label =</span> <span class="st">"Moisture and Temperature"</span>, <span class="at">color =</span> <span class="st">"#4d4c4c"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">3.5</span>)</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>NO_WETUP_CH4_timeseries</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LabGas_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave(</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filename = "LAB_CH4_ActualData.png",</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   plot = NO_WETUP_CH4_timeseries,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   width = 8,    # adjust width as needed</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   height = 6,   # adjust height as needed</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   dpi = 300     # adjust dpi for resolution</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Different graphs </span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>NO_WETUP_CH4_timeseries_facet <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(NO_WETUP_six, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Date_corr, <span class="at">y =</span> mean_CH4, </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">group =</span> treatment,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> WHC,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">linetype =</span> Temperature)) <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-16"</span>) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">xmax =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-17"</span>) <span class="sc">+</span> <span class="fl">0.5</span> , <span class="at">ymin =</span>  <span class="sc">-</span><span class="fl">1e-10</span>, <span class="at">ymax =</span> <span class="cn">Inf</span>), </span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">fill =</span> <span class="st">"#e6ecef"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-20"</span>) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">xmax =</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-23"</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">ymin =</span> <span class="sc">-</span><span class="fl">1e-10</span>, <span class="at">ymax =</span> <span class="cn">Inf</span>), </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">fill =</span> <span class="st">"#efe8e6"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_CH4 <span class="sc">-</span> sd_CH4, </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> mean_CH4 <span class="sc">+</span> sd_CH4,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">color =</span> WHC,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>                    <span class="at">linetype =</span> Temperature),</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> custom_colors, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> line_types, <span class="at">name =</span> <span class="st">"Temperature"</span>) <span class="sc">+</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"CH4 Flux Over Time by Treatment"</span>,</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>, </span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean CH4 Flux ± SD"</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> treatment, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>NO_WETUP_CH4_timeseries_facet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LabGas_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave(</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filename = "LAB_CH4_ActualData_facet.png",</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   plot = NO_WETUP_CH4_timeseries_facet,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   width = 8,    # adjust width as needed</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   height = 6,   # adjust height as needed</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   dpi = 300     # adjust dpi for resolution</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="mixed-model-effect-1" class="level1">
+<h1>Mixed Model effect</h1>
+<section id="making-phase-1" class="level2">
+<h2 class="anchored" data-anchor-id="making-phase-1">Making “Phase”</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>m4_phase_CH4 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(finalCH4_flux <span class="sc">~</span> treatment <span class="sc">*</span> phase <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>JarID), </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> flux_six_jars, </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">na.action =</span> na.omit)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m4_phase_CH4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: finalCH4_flux ~ treatment * phase + (1 | JarID)
+   Data: flux_six_jars
+
+REML criterion at convergence: -12474.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.4826 -0.0333 -0.0054  0.0225 17.5400 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. 
+ JarID    (Intercept) 5.321e-20 2.307e-10
+ Residual             6.751e-18 2.598e-09
+Number of obs: 353, groups:  JarID, 36
+
+Fixed effects:
+                                   Estimate Std. Error t value
+(Intercept)                       5.410e-11  3.965e-10   0.136
+treatment20-35                   -3.410e-11  5.633e-10  -0.061
+treatment50-25                    4.636e-11  5.549e-10   0.084
+treatment50-35                    5.051e-11  5.603e-10   0.090
+treatment90-25                   -9.880e-11  5.549e-10  -0.178
+treatment90-35                    1.544e-09  5.551e-10   2.780
+phaseMoistureOnly                 4.710e-11  8.431e-10   0.056
+treatment20-35:phaseMoistureOnly -2.069e-11  1.194e-09  -0.017
+treatment50-25:phaseMoistureOnly  1.105e-10  1.190e-09   0.093
+treatment50-35:phaseMoistureOnly  6.352e-11  1.192e-09   0.053
+treatment90-25:phaseMoistureOnly -5.616e-13  1.190e-09   0.000
+treatment90-35:phaseMoistureOnly -1.064e-09  1.190e-09  -0.894
+
+Correlation of Fixed Effects:
+            (Intr) tr20-35 tr50-25 tr50-35 tr90-25 tr90-35 phsMsO t20-35:
+trtmnt20-35 -0.704                                                       
+trtmnt50-25 -0.715  0.503                                                
+trtmnt50-35 -0.708  0.498   0.506                                        
+trtmnt90-25 -0.715  0.503   0.511   0.506                                
+trtmnt90-35 -0.714  0.503   0.510   0.505   0.510                        
+phsMstrOnly -0.444  0.312   0.317   0.314   0.317   0.317                
+trt20-35:MO  0.313 -0.446  -0.224  -0.222  -0.224  -0.224  -0.706        
+trt50-25:MO  0.314 -0.221  -0.440  -0.223  -0.225  -0.225  -0.709  0.501 
+trt50-35:MO  0.314 -0.221  -0.224  -0.443  -0.224  -0.224  -0.707  0.500 
+trt90-25:MO  0.314 -0.221  -0.225  -0.223  -0.440  -0.225  -0.709  0.501 
+trt90-35:MO  0.314 -0.221  -0.225  -0.223  -0.225  -0.440  -0.709  0.501 
+            t50-25: t50-35: t90-25:
+trtmnt20-35                        
+trtmnt50-25                        
+trtmnt50-35                        
+trtmnt90-25                        
+trtmnt90-35                        
+phsMstrOnly                        
+trt20-35:MO                        
+trt50-25:MO                        
+trt50-35:MO  0.501                 
+trt90-25:MO  0.502   0.501         
+trt90-35:MO  0.502   0.501   0.502 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>emm_CH4 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m4_phase_CH4, <span class="sc">~</span> treatment <span class="sc">*</span> phase)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">contrast</span>(emm_CH4, <span class="at">interaction =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"sidak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> treatment_eff  phase_eff               estimate       SE  df t.ratio p.value
+ (20-25) effect (Moisture+Temp) effect -7.59e-11 3.85e-10 328  -0.197  1.0000
+ (20-35) effect (Moisture+Temp) effect -6.56e-11 3.86e-10 325  -0.170  1.0000
+ (50-25) effect (Moisture+Temp) effect -1.31e-10 3.84e-10 325  -0.342  1.0000
+ (50-35) effect (Moisture+Temp) effect -1.08e-10 3.85e-10 324  -0.280  1.0000
+ (90-25) effect (Moisture+Temp) effect -7.56e-11 3.84e-10 325  -0.197  1.0000
+ (90-35) effect (Moisture+Temp) effect  4.56e-10 3.84e-10 327   1.187  0.9604
+ (20-25) effect MoistureOnly effect     7.59e-11 3.85e-10 328   0.197  1.0000
+ (20-35) effect MoistureOnly effect     6.56e-11 3.86e-10 325   0.170  1.0000
+ (50-25) effect MoistureOnly effect     1.31e-10 3.84e-10 325   0.342  1.0000
+ (50-35) effect MoistureOnly effect     1.08e-10 3.85e-10 324   0.280  1.0000
+ (90-25) effect MoistureOnly effect     7.56e-11 3.84e-10 325   0.197  1.0000
+ (90-35) effect MoistureOnly effect    -4.56e-10 3.84e-10 327  -1.187  0.9604
+
+Degrees-of-freedom method: kenward-roger 
+P value adjustment: sidak method for 12 tests </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="wetup" class="level1">
+<h1>WETUP</h1>
+<section id="adding-a-wet-up-stage-column" class="level2">
+<h2 class="anchored" data-anchor-id="adding-a-wet-up-stage-column">Adding a wet up stage column</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>wet_up_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PRE_WET"</span>, <span class="st">"three_min"</span>, <span class="st">"one_hour"</span>, <span class="st">"four_hour"</span>, <span class="st">"eight_hour"</span>, <span class="st">"tweny_four_hour"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#flux_three_jars</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>WETUP <span class="ot">&lt;-</span> flux_three_jars <span class="sc">%&gt;%</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(wet_up_cols), <span class="sc">~</span> <span class="fu">na_if</span>(., <span class="st">"NA"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">WET_UP_stage =</span> {</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>      values <span class="ot">&lt;-</span> <span class="fu">c_across</span>(<span class="fu">all_of</span>(wet_up_cols))</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>      cols <span class="ot">&lt;-</span> wet_up_cols[<span class="sc">!</span><span class="fu">is.na</span>(values)]</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(<span class="fu">length</span>(cols) <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="fu">str_c</span>(cols, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="cn">NA</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">WET_UP_stage =</span> <span class="fu">factor</span>(</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>      WET_UP_stage,</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> wet_up_cols,</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">ordered =</span> <span class="cn">TRUE</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a><span class="co">#WETUP</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="filtering" class="level2">
+<h2 class="anchored" data-anchor-id="filtering">Filtering</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>WETUP <span class="ot">&lt;-</span> WETUP <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(...<span class="dv">1</span>, Model, JarID, Time, Label, finalC02_flux, finalCH4_flux, treatment,Dateflux,Date_corr, WET_UP_stage) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date_corr <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2024-07-29"</span>, <span class="st">"2024-07-30"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(treatment, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"WHC"</span>, <span class="st">"Temperature"</span>), <span class="at">remove =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">WHC =</span> <span class="fu">factor</span>(WHC, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"20"</span>, <span class="st">"50"</span>, <span class="st">"90"</span>)),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Temperature =</span> <span class="fu">factor</span>(Temperature, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"25"</span>, <span class="st">"35"</span>, <span class="st">"30"</span>)))</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">#WETUP_summ</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>WETUP_summ <span class="ot">&lt;-</span> WETUP <span class="sc">%&gt;%</span> </span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(treatment, WET_UP_stage) <span class="sc">%&gt;%</span>  </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_CO2 =</span> <span class="fu">mean</span>(finalC02_flux),</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_CO2 =</span> <span class="fu">sd</span>(finalC02_flux),</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_CO2 =</span> sd_CO2 <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">n</span>()),  <span class="co"># Standard error for CO2</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_CH4 =</span> <span class="fu">mean</span>(finalCH4_flux),</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_CH4 =</span> <span class="fu">sd</span>(finalCH4_flux),</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_CH4 =</span> sd_CH4 <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">n</span>()),  <span class="co"># Standard error for CH4</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(treatment, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"WHC"</span>, <span class="st">"Temperature"</span>), <span class="at">remove =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">WHC =</span> <span class="fu">factor</span>(WHC, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"20"</span>, <span class="st">"50"</span>, <span class="st">"90"</span>)),</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">Temperature =</span> <span class="fu">factor</span>(Temperature, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"25"</span>, <span class="st">"35"</span>, <span class="st">"30"</span>)))</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="co">#WETUP_summ</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="co2-wet-up-graph" class="level2">
+<h2 class="anchored" data-anchor-id="co2-wet-up-graph">CO2 WET UP Graph</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CO2</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>WETUP_ActualMeasurements_CO2 <span class="ot">&lt;-</span> WETUP_summ <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> WET_UP_stage, <span class="at">y =</span> mean_CO2,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">group =</span> treatment,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> WHC,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype =</span> Temperature)) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">ymin =</span> mean_CO2 <span class="sc">-</span> se_CO2, <span class="at">ymax =</span> mean_CO2 <span class="sc">+</span> se_CO2),</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fl">0.5</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> custom_colors, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> line_types, <span class="at">name =</span> <span class="st">"Temperature"</span>) <span class="sc">+</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>( <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"0 min"</span>, <span class="st">"3 min"</span>, <span class="st">"1 hr"</span>, <span class="st">"4 hr"</span>, <span class="st">"8 hr"</span>, <span class="st">"24 hr"</span>) )<span class="sc">+</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"WET-UP CO₂ Flux Over Time by Treatment"</span>,</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Wet-up Stage"</span>, </span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean CO₂ Flux ± SE"</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>WETUP_ActualMeasurements_CO2 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LabGas_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">"LAB_WETUP_ActualMeasurements_CO2.png"</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> WETUP_ActualMeasurements_CO2,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">"~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,    <span class="co"># adjust width as needed</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">6</span>,   <span class="co"># adjust height as needed</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">dpi =</span> <span class="dv">300</span>     <span class="co"># adjust dpi for resolution</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="mixed-effects-model" class="level1">
+<h1>Mixed effects model</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>WETUP_no_PRE <span class="ot">&lt;-</span> WETUP <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(WET_UP_stage <span class="sc">!=</span> <span class="st">"PRE_WET"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>WETUP_CO2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(finalC02_flux <span class="sc">~</span> WHC <span class="sc">*</span> Temperature <span class="sc">*</span> WET_UP_stage <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>JarID), </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span>  WETUP_no_PRE, </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">na.action =</span> na.omit)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(WETUP_CO2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: finalC02_flux ~ WHC * Temperature * WET_UP_stage + (1 | JarID)
+   Data: WETUP_no_PRE
+
+REML criterion at convergence: -2407.8
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.92170 -0.33641  0.01368  0.30670  2.99908 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. 
+ JarID    (Intercept) 1.654e-20 1.286e-10
+ Residual             9.478e-20 3.079e-10
+Number of obs: 90, groups:  JarID, 18
+
+Fixed effects:
+                                     Estimate Std. Error t value
+(Intercept)                         1.268e-09  1.088e-10  11.658
+WHC50                              -6.577e-10  1.538e-10  -4.276
+WHC90                              -7.360e-10  1.538e-10  -4.785
+Temperature35                       1.121e-09  1.538e-10   7.289
+WET_UP_stage.L                      1.700e-09  1.777e-10   9.563
+WET_UP_stage.Q                      3.363e-10  1.777e-10   1.892
+WET_UP_stage.C                      2.520e-10  1.777e-10   1.418
+WET_UP_stage^4                      1.195e-10  1.777e-10   0.672
+WHC50:Temperature35                -6.113e-10  2.175e-10  -2.810
+WHC90:Temperature35                -7.086e-10  2.175e-10  -3.257
+WHC50:WET_UP_stage.L               -1.184e-09  2.514e-10  -4.711
+WHC90:WET_UP_stage.L               -1.195e-09  2.514e-10  -4.755
+WHC50:WET_UP_stage.Q               -2.516e-10  2.514e-10  -1.001
+WHC90:WET_UP_stage.Q               -1.991e-10  2.514e-10  -0.792
+WHC50:WET_UP_stage.C               -2.340e-10  2.514e-10  -0.931
+WHC90:WET_UP_stage.C               -4.234e-10  2.514e-10  -1.685
+WHC50:WET_UP_stage^4                2.790e-11  2.514e-10   0.111
+WHC90:WET_UP_stage^4                7.031e-11  2.514e-10   0.280
+Temperature35:WET_UP_stage.L        1.933e-09  2.514e-10   7.690
+Temperature35:WET_UP_stage.Q       -2.660e-10  2.514e-10  -1.058
+Temperature35:WET_UP_stage.C       -7.850e-11  2.514e-10  -0.312
+Temperature35:WET_UP_stage^4       -7.952e-11  2.514e-10  -0.316
+WHC50:Temperature35:WET_UP_stage.L -9.337e-10  3.555e-10  -2.627
+WHC90:Temperature35:WET_UP_stage.L -1.430e-09  3.555e-10  -4.022
+WHC50:Temperature35:WET_UP_stage.Q  4.178e-10  3.555e-10   1.175
+WHC90:Temperature35:WET_UP_stage.Q  3.082e-10  3.555e-10   0.867
+WHC50:Temperature35:WET_UP_stage.C  1.496e-10  3.555e-10   0.421
+WHC90:Temperature35:WET_UP_stage.C  2.138e-10  3.555e-10   0.601
+WHC50:Temperature35:WET_UP_stage^4  3.668e-11  3.555e-10   0.103
+WHC90:Temperature35:WET_UP_stage^4 -2.274e-10  3.555e-10  -0.640</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>WETUP_emm_CO2 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(WETUP_CO2, <span class="sc">~</span> WHC <span class="sc">*</span> Temperature <span class="sc">*</span> WET_UP_stage)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">contrast</span>(WETUP_emm_CO2, <span class="at">interaction =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"sidak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> WHC_eff   Temperature_eff WET_UP_stage_eff        estimate       SE df t.ratio
+ 20 effect 25 effect       three_min effect        2.91e-10 9.18e-11 48   3.169
+ 50 effect 25 effect       three_min effect       -9.46e-11 9.18e-11 48  -1.031
+ 90 effect 25 effect       three_min effect       -1.96e-10 9.18e-11 48  -2.138
+ 20 effect 35 effect       three_min effect       -2.91e-10 9.18e-11 48  -3.169
+ 50 effect 35 effect       three_min effect        9.46e-11 9.18e-11 48   1.031
+ 90 effect 35 effect       three_min effect        1.96e-10 9.18e-11 48   2.138
+ 20 effect 25 effect       one_hour effect         1.46e-10 9.18e-11 48   1.588
+ 50 effect 25 effect       one_hour effect         1.54e-11 9.18e-11 48   0.168
+ 90 effect 25 effect       one_hour effect        -1.61e-10 9.18e-11 48  -1.755
+ 20 effect 35 effect       one_hour effect        -1.46e-10 9.18e-11 48  -1.588
+ 50 effect 35 effect       one_hour effect        -1.54e-11 9.18e-11 48  -0.168
+ 90 effect 35 effect       one_hour effect         1.61e-10 9.18e-11 48   1.755
+ 20 effect 25 effect       four_hour effect       -8.75e-11 9.18e-11 48  -0.953
+ 50 effect 25 effect       four_hour effect        1.10e-11 9.18e-11 48   0.120
+ 90 effect 25 effect       four_hour effect        7.65e-11 9.18e-11 48   0.833
+ 20 effect 35 effect       four_hour effect        8.75e-11 9.18e-11 48   0.953
+ 50 effect 35 effect       four_hour effect       -1.10e-11 9.18e-11 48  -0.120
+ 90 effect 35 effect       four_hour effect       -7.65e-11 9.18e-11 48  -0.833
+ 20 effect 25 effect       eight_hour effect      -1.80e-10 9.18e-11 48  -1.961
+ 50 effect 25 effect       eight_hour effect       7.95e-11 9.18e-11 48   0.866
+ 90 effect 25 effect       eight_hour effect       1.00e-10 9.18e-11 48   1.095
+ 20 effect 35 effect       eight_hour effect       1.80e-10 9.18e-11 48   1.961
+ 50 effect 35 effect       eight_hour effect      -7.95e-11 9.18e-11 48  -0.866
+ 90 effect 35 effect       eight_hour effect      -1.00e-10 9.18e-11 48  -1.095
+ 20 effect 25 effect       tweny_four_hour effect -1.69e-10 9.18e-11 48  -1.842
+ 50 effect 25 effect       tweny_four_hour effect -1.13e-11 9.18e-11 48  -0.124
+ 90 effect 25 effect       tweny_four_hour effect  1.80e-10 9.18e-11 48   1.966
+ 20 effect 35 effect       tweny_four_hour effect  1.69e-10 9.18e-11 48   1.842
+ 50 effect 35 effect       tweny_four_hour effect  1.13e-11 9.18e-11 48   0.124
+ 90 effect 35 effect       tweny_four_hour effect -1.80e-10 9.18e-11 48  -1.966
+ p.value
+  0.0769
+  1.0000
+  0.6835
+  0.0769
+  1.0000
+  0.6835
+  0.9776
+  1.0000
+  0.9317
+  0.9776
+  1.0000
+  0.9317
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  0.8207
+  1.0000
+  0.9999
+  0.8207
+  1.0000
+  0.9999
+  0.8924
+  1.0000
+  0.8174
+  0.8924
+  1.0000
+  0.8174
+
+Degrees-of-freedom method: kenward-roger 
+P value adjustment: sidak method for 30 tests </code></pre>
+</div>
+</div>
+<section id="ch4" class="level2">
+<h2 class="anchored" data-anchor-id="ch4">CH4</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>WETUP_ActualMeasurements_CH4 <span class="ot">&lt;-</span> WETUP_summ <span class="sc">%&gt;%</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> WET_UP_stage, <span class="at">y =</span> mean_CH4,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">group =</span> treatment,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> WHC,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype =</span> Temperature)) <span class="sc">+</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">ymin =</span> mean_CH4 <span class="sc">-</span> se_CH4, <span class="at">ymax =</span> mean_CH4 <span class="sc">+</span> se_CH4),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fl">0.5</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> custom_colors, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> line_types, <span class="at">name =</span> <span class="st">"Temperature"</span>) <span class="sc">+</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>( <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"0 min"</span>, <span class="st">"3 min"</span>, <span class="st">"1 hr"</span>, <span class="st">"4 hr"</span>, <span class="st">"8 hr"</span>, <span class="st">"24 hr"</span>) )<span class="sc">+</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"WET-UP CH₄ Flux Over Time by Treatment"</span>,</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Stage"</span>, </span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean CH₄ Flux ± SE"</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>WETUP_ActualMeasurements_CH4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LabGas_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">"LAB_WETUP_ActualMeasurements_CH4.png"</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> WETUP_ActualMeasurements_CH4,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">"~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas"</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,    <span class="co"># adjust width as needed</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">6</span>,   <span class="co"># adjust height as needed</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">dpi =</span> <span class="dv">300</span>     <span class="co"># adjust dpi for resolution</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>WETUP_ActualMeasurements_CH4_facet <span class="ot">&lt;-</span> WETUP_summ <span class="sc">%&gt;%</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> WET_UP_stage, <span class="at">y =</span> mean_CH4,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">group =</span> treatment,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> WHC,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype =</span> Temperature)) <span class="sc">+</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">ymin =</span> mean_CH4 <span class="sc">-</span> se_CH4, <span class="at">ymax =</span> mean_CH4 <span class="sc">+</span> se_CH4),</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fl">0.5</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> custom_colors, <span class="at">name =</span> <span class="st">"WHC (%)"</span>) <span class="sc">+</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> line_types, <span class="at">name =</span> <span class="st">"Temperature"</span>) <span class="sc">+</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>( <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"0 min"</span>, <span class="st">"3 min"</span>, <span class="st">"1 hr"</span>, <span class="st">"4 hr"</span>, <span class="st">"8 hr"</span>, <span class="st">"24 hr"</span>) )<span class="sc">+</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"WET-UP CH₄ Flux Over Time by Treatment"</span>,</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Stage"</span>, </span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean CH₄ Flux ± SE"</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>treatment, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>WETUP_ActualMeasurements_CH4_facet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LabGas_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">"LAB_WETUP_ActualMeasurements_CH4_facet.png"</span>,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> WETUP_ActualMeasurements_CH4_facet,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">"~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas"</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,    <span class="co"># adjust width as needed</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">6</span>,   <span class="co"># adjust height as needed</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">dpi =</span> <span class="dv">300</span>     <span class="co"># adjust dpi for resolution</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>WETUP_CH4 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(finalCH4_flux <span class="sc">~</span> WHC <span class="sc">*</span> Temperature <span class="sc">*</span> WET_UP_stage <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>JarID), </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span>  WETUP_no_PRE, </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">na.action =</span> na.omit)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(WETUP_CH4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: finalCH4_flux ~ WHC * Temperature * WET_UP_stage + (1 | JarID)
+   Data: WETUP_no_PRE
+
+REML criterion at convergence: -2410.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.8482 -0.0190 -0.0003  0.0215  2.4270 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. 
+ JarID    (Intercept) 0.000e+00 0.000e+00
+ Residual             1.031e-19 3.211e-10
+Number of obs: 90, groups:  JarID, 18
+
+Fixed effects:
+                                     Estimate Std. Error t value
+(Intercept)                         2.217e-11  8.292e-11   0.267
+WHC50                               1.481e-11  1.173e-10   0.126
+WHC90                              -1.483e-10  1.173e-10  -1.264
+Temperature35                      -8.370e-11  1.173e-10  -0.714
+WET_UP_stage.L                     -2.227e-11  1.854e-10  -0.120
+WET_UP_stage.Q                      1.709e-11  1.854e-10   0.092
+WET_UP_stage.C                      2.262e-11  1.854e-10   0.122
+WET_UP_stage^4                      1.346e-11  1.854e-10   0.073
+WHC50:Temperature35                 8.200e-11  1.658e-10   0.495
+WHC90:Temperature35                 1.540e-10  1.658e-10   0.929
+WHC50:WET_UP_stage.L               -2.198e-11  2.622e-10  -0.084
+WHC90:WET_UP_stage.L                2.668e-10  2.622e-10   1.018
+WHC50:WET_UP_stage.Q                2.109e-11  2.622e-10   0.080
+WHC90:WET_UP_stage.Q                2.256e-10  2.622e-10   0.861
+WHC50:WET_UP_stage.C               -4.069e-11  2.622e-10  -0.155
+WHC90:WET_UP_stage.C               -5.091e-10  2.622e-10  -1.942
+WHC50:WET_UP_stage^4               -1.003e-11  2.622e-10  -0.038
+WHC90:WET_UP_stage^4                3.581e-10  2.622e-10   1.366
+Temperature35:WET_UP_stage.L        3.305e-10  2.622e-10   1.260
+Temperature35:WET_UP_stage.Q       -2.841e-10  2.622e-10  -1.084
+Temperature35:WET_UP_stage.C        1.287e-10  2.622e-10   0.491
+Temperature35:WET_UP_stage^4       -8.132e-11  2.622e-10  -0.310
+WHC50:Temperature35:WET_UP_stage.L -2.922e-10  3.708e-10  -0.788
+WHC90:Temperature35:WET_UP_stage.L -9.038e-10  3.708e-10  -2.437
+WHC50:Temperature35:WET_UP_stage.Q  2.516e-10  3.708e-10   0.679
+WHC90:Temperature35:WET_UP_stage.Q -2.622e-10  3.708e-10  -0.707
+WHC50:Temperature35:WET_UP_stage.C -1.124e-10  3.708e-10  -0.303
+WHC90:Temperature35:WET_UP_stage.C  1.569e-10  3.708e-10   0.423
+WHC50:Temperature35:WET_UP_stage^4  6.712e-11  3.708e-10   0.181
+WHC90:Temperature35:WET_UP_stage^4 -3.677e-10  3.708e-10  -0.992</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>WETUP_emm_CH4 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(WETUP_CH4, <span class="sc">~</span> WHC <span class="sc">*</span> Temperature <span class="sc">*</span> WET_UP_stage)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">contrast</span>(WETUP_emm_CH4, <span class="at">interaction =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"sidak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> WHC_eff   Temperature_eff WET_UP_stage_eff        estimate       SE df t.ratio
+ 20 effect 25 effect       three_min effect        1.17e-10 9.57e-11 48   1.220
+ 50 effect 25 effect       three_min effect       -6.46e-11 9.57e-11 48  -0.675
+ 90 effect 25 effect       three_min effect       -5.22e-11 9.57e-11 48  -0.545
+ 20 effect 35 effect       three_min effect       -1.17e-10 9.57e-11 48  -1.220
+ 50 effect 35 effect       three_min effect        6.46e-11 9.57e-11 48   0.675
+ 90 effect 35 effect       three_min effect        5.22e-11 9.57e-11 48   0.545
+ 20 effect 25 effect       one_hour effect         9.21e-11 9.57e-11 48   0.962
+ 50 effect 25 effect       one_hour effect         1.31e-10 9.57e-11 48   1.370
+ 90 effect 25 effect       one_hour effect        -2.23e-10 9.57e-11 48  -2.332
+ 20 effect 35 effect       one_hour effect        -9.21e-11 9.57e-11 48  -0.962
+ 50 effect 35 effect       one_hour effect        -1.31e-10 9.57e-11 48  -1.370
+ 90 effect 35 effect       one_hour effect         2.23e-10 9.57e-11 48   2.332
+ 20 effect 25 effect       four_hour effect       -3.50e-11 9.57e-11 48  -0.365
+ 50 effect 25 effect       four_hour effect        8.19e-12 9.57e-11 48   0.086
+ 90 effect 25 effect       four_hour effect        2.68e-11 9.57e-11 48   0.280
+ 20 effect 35 effect       four_hour effect        3.50e-11 9.57e-11 48   0.365
+ 50 effect 35 effect       four_hour effect       -8.19e-12 9.57e-11 48  -0.086
+ 90 effect 35 effect       four_hour effect       -2.68e-11 9.57e-11 48  -0.280
+ 20 effect 25 effect       eight_hour effect      -4.33e-11 9.57e-11 48  -0.452
+ 50 effect 25 effect       eight_hour effect       1.70e-11 9.57e-11 48   0.178
+ 90 effect 25 effect       eight_hour effect       2.63e-11 9.57e-11 48   0.274
+ 20 effect 35 effect       eight_hour effect       4.33e-11 9.57e-11 48   0.452
+ 50 effect 35 effect       eight_hour effect      -1.70e-11 9.57e-11 48  -0.178
+ 90 effect 35 effect       eight_hour effect      -2.63e-11 9.57e-11 48  -0.274
+ 20 effect 25 effect       tweny_four_hour effect -1.31e-10 9.57e-11 48  -1.365
+ 50 effect 25 effect       tweny_four_hour effect -9.17e-11 9.57e-11 48  -0.958
+ 90 effect 25 effect       tweny_four_hour effect  2.22e-10 9.57e-11 48   2.323
+ 20 effect 35 effect       tweny_four_hour effect  1.31e-10 9.57e-11 48   1.365
+ 50 effect 35 effect       tweny_four_hour effect  9.17e-11 9.57e-11 48   0.958
+ 90 effect 35 effect       tweny_four_hour effect -2.22e-10 9.57e-11 48  -2.323
+ p.value
+  0.9996
+  1.0000
+  1.0000
+  0.9996
+  1.0000
+  1.0000
+  1.0000
+  0.9971
+  0.5165
+  1.0000
+  0.9971
+  0.5165
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  1.0000
+  0.9973
+  1.0000
+  0.5246
+  0.9973
+  1.0000
+  0.5246
+
+Degrees-of-freedom method: kenward-roger 
+P value adjustment: sidak method for 30 tests </code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

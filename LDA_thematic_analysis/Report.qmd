@@ -241,6 +241,3 @@ Locally, Colombian communities seemed to play a mixed role— topics like Venezu
 
 Finally, the sharp increase in coverage in 2023 reflects migration’s growing importance in Colombian media. Topics such as Migration, Diplomacy, and Guerrilla gained prominence, illustrating shifting political and social priorities. By applying LDA iteratively, we uncovered both broad themes and nuanced subtopics, demonstrating the value of focused modeling in revealing the complexities of migration narratives and their global connections. Additionally, we also understood the importance of pairing this style of modelling with a strong method for determining the topic names and capture the nuances of the ways how different articles connect.
 
-## Presentation slides
-
-<embed src="LDA_presentation.pdf" type="application/pdf" width="100%" height="450px" />

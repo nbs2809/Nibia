@@ -11,7 +11,7 @@ format:
 
 ```{r setup, include=FALSE}
 #| message: false
-library(snpStats)
+#library(snpStats)
 library(tidyverse)
 library(broom)
 library(qqman)

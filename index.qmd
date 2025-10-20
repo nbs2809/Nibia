@@ -1,6 +1,15 @@
 ---
 title: "Portfolio"
+toc: false         
+page-layout: full
 ---
+
+::: {.hero style="background:#556B2F; color:white; padding:2rem; text-align:center; border-radius:10px;"}
+# Nibia Becerra Santillan
+Translating science into actionable solutions  
+\
+[Download My CV](resume.pdf){.btn .btn-light .me-2} [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
+:::
 
 ## [About Me]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
 
@@ -12,7 +21,7 @@ title: "Portfolio"
 ::: g-col-8
 ### Nibia Becerra Santillan
 
-**Pronouns:** [she/her]{style="font-style: italic"}
+**Pronouns:** *she/her*
 
 **Education:** Macalester College, B.A. Biology and Statistics
 
@@ -20,4 +29,7 @@ title: "Portfolio"
 :::
 :::::
 
-## 
+:::{.spacer style="height: 3rem;"}
+:::
+
+

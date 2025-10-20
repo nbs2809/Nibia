@@ -1,0 +1,102 @@
+---
+title: "Projects"
+page-layout: article
+editor: visual
+---
+
+```{=html}
+<!-- Filter toolbar -->
+<div class="container my-4">
+  <div id="filters" class="d-flex flex-wrap gap-2 mb-3">
+    <button class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="R">R</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="Python">Python</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="Shiny">Shiny</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="SQL">SQL</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="Geospatial">Geospatial</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="NLP">NLP</button>
+  </div>
+
+  <!-- Projects Grid -->
+  <div id="projects-grid" class="row justify-content-center g-4">
+
+    <!-- Lab Gas Processing (Honors Thesis core) -->
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 shadow-sm project"
+           data-tags="R, tidyverse, lme4, ggplot2">
+        <img src="images/LAB_CO2_ActualData.png" class="card-img-top"
+             alt="CO₂/CH₄ flux time series and model fits" style="object-fit:cover; height:200px;">
+        <div class="card-body">
+          <h5 class="card-title"><a href="LabGas.html">Laboratory Gas Data Processing</a></h5>
+          <p class="card-text">Processed 750+ high-freq CO₂/CH₄ runs; Li-COR equations, volume corrections, mixed models, and publication-quality plots.</p>
+          <span class="badge bg-secondary">R</span>
+          <span class="badge bg-secondary">tidyverse</span>
+          <span class="badge bg-secondary">lme4</span>
+          <span class="badge bg-secondary">ggplot2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brazil Shiny Dashboard -->
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 shadow-sm project"
+           data-tags="R, Shiny, ggplot2, Geospatial, sf">
+        <img src="images/Brazil_Shiny_app.png" class="card-img-top"
+             alt="Brazil tree cover loss dashboard preview" style="object-fit:cover; height:200px;">
+        <div class="card-body">
+          <h5 class="card-title"><a href="https://fridam.shinyapps.io/bz_treecoverloss/" target="_blank" rel="noopener">Brazil Tree Cover Loss Dashboard</a></h5>
+          <p class="card-text">Interactive Shiny app exploring two decades of tree cover loss; merged shapefiles with political boundaries; filter by region and year.</p>
+          <span class="badge bg-secondary">R</span>
+          <span class="badge bg-secondary">Shiny</span>
+          <span class="badge bg-secondary">ggplot2</span>
+          <span class="badge bg-secondary">sf</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- News Text Mining -->
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 shadow-sm project"
+           data-tags="R, NLP, tidytext, regex">
+        <img src="images/News_LDA.png" class="card-img-top"
+             alt="Topic clusters for news corpus" style="object-fit:cover; height:200px;">
+        <div class="card-body">
+          <!-- use .html if this is the published file -->
+          <h5 class="card-title"><a href="LDA_thematic_analysis/Report.html">News Text Mining</a></h5>
+          <p class="card-text">Built extraction & preprocessing pipeline for 5,061 articles (PDF→text, regex, tokenization) enabling LDA topic modeling and trends.</p>
+          <span class="badge bg-secondary">R</span>
+          <span class="badge bg-secondary">tidytext</span>
+          <span class="badge bg-secondary">regex</span>
+          <span class="badge bg-secondary">LDA</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tiny filter script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const buttons = document.querySelectorAll('#filters [data-filter]');
+  const cards = document.querySelectorAll('#projects-grid .project');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const key = btn.dataset.filter.toLowerCase();
+
+      cards.forEach(card => {
+        const tags = (card.dataset.tags || '').toLowerCase();
+        const show = key === 'all' || tags.includes(key);
+        // hide/show the column that contains the card
+        card.closest('.col-12, .col-sm-6, .col-lg-4').style.display = show ? '' : 'none';
+      });
+    });
+  });
+});
+</script>
+
+```
+

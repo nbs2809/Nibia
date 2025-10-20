@@ -39,7 +39,6 @@ We will study the Tree Climate Adaptation by simulating SNPs data associated to 
 
 **Hypothesis 2**: The identified SNPs are linked to genes involved in stress response, carbon metabolism, or mitochondrial efficiency.
 
-
 To answer this questions we will conduct a simulation study.
 
 ### Our Dataset
@@ -51,7 +50,6 @@ We will generate:\
 1.  **1000 tress** with **random SNPs** (0, 1, 2 copies of a minor allele).\
 2.  A tertiary **CO2 release rate** trait (higher, med, low???) influenced by a SNP.\
 3.  **3 tree species at different elevations** which are our populations.
-
 
 ```{r, output = FALSE}
 set.seed(394)
@@ -132,28 +130,21 @@ head(tree_pcadata)
 dim(tree_pcadata)
 ```
 
-
 ::: {.callout-note icon="false" title="What is the other factor?"}
 Hint: Starts with "E", and ends with "levation"
 :::
 
-
-
 ### Why do we care about this other factor? How could it play a role in our experiment?
+
 \
 
 🚩 Confounding in GWAS 🚩
 
 "A confounder is a common cause of both the causal variable of interest and the outcome (e.g. living area could be a confounder of fireplace presence and house price)" (STAT 155 Notes, Macalester Statistics Faculty).
 
-A variable $X_2$ is a confounder if:
-- causally associated with the outcome Y in the population 
-- causally associated with the predictor of interest $X_1$ in the population
-(i.e., $X_2$ is a common cause of both the outcome and predictor of interest)
+A variable $X_2$ is a confounder if: - causally associated with the outcome Y in the population - causally associated with the predictor of interest $X_1$ in the population (i.e., $X_2$ is a common cause of both the outcome and predictor of interest)
 
 ![Causal Graph](./CausalGraph_Confounding.jpeg)
-
-
 
 ### Generally in GWAS...
 
@@ -165,28 +156,27 @@ In GWAS, such geographic or environmental clines can confound SNP-trait associat
 
 PCA helps to:
 
-    Detect continuous genetic gradients (e.g., allele frequency changes correlated with elevation).
+```         
+Detect continuous genetic gradients (e.g., allele frequency changes correlated with elevation).
 
-    Adjust for confounding by including top principal components (PCs) as covariates, isolating true SNP-trait signals from spatially structured noise.
-
-
+Adjust for confounding by including top principal components (PCs) as covariates, isolating true SNP-trait signals from spatially structured noise.
+```
 
 ### Specifically for this study...
 
-The question marks on our Causal Graph that go from Elevation to Tree genus, and Elevation to Metabolic rate indicate that there might be a causality relationship that is associated with both the treatment and the outcome of our experiment. 
+The question marks on our Causal Graph that go from Elevation to Tree genus, and Elevation to Metabolic rate indicate that there might be a causality relationship that is associated with both the treatment and the outcome of our experiment.
 
-- Temperatures are very low at high altitudes and can remain below 0 °C during summer -> Low temperatures are identified as critical limitations to plant biochemical processes and physiological activities (Larcher and Bauer 1981, cited by Zheng et al.,2021).
+-   Temperatures are very low at high altitudes and can remain below 0 °C during summer -\> Low temperatures are identified as critical limitations to plant biochemical processes and physiological activities (Larcher and Bauer 1981, cited by Zheng et al.,2021).
 
-- Evolutionary theories talk about how environmental conditions lead to speciation throuhg natural selection, highlighting how genetic variation play a role on this process (Stebbins, 1950)
+-   Evolutionary theories talk about how environmental conditions lead to speciation throuhg natural selection, highlighting how genetic variation play a role on this process (Stebbins, 1950)
 
 ### Why do we want to use PCA (Principal Component Analysis)?
 
 PCA identifies axes of genetic variation (principal components) that capture ancestry. These axes/ancestry often correlate with unmeasured confounders, like in our experiment geographic elevation. By including top PCs as covariates in GWAS, we adjust for latent population structure, reducing spurious SNP-trait associations (Price et al., 2010; National Academies, 2023).
 
- 🌱 Population Structure 🌱
+🌱 Population Structure 🌱
 
-Population Structure refers all non-random genetic variation across human groups that are shaped by historical demography (e.g., migration, drift, etc) are what defines population structure (Price, A. et al., 2010).  In GWAS, we study the association between certain SNPs to a trait, therefore when we have variation that is connected to a human group, wheather or no there is association with the trait, it Introduces spurious (false) associations between genetic variants and traits (National Academies, 2023; Bryc, K. 2015). This is a current challenge that GWAS tries to address by accounting for it and developing methods that address population structure, family relateness and cryptic relateness (Price, A. et al., 2010).
-
+Population Structure refers all non-random genetic variation across human groups that are shaped by historical demography (e.g., migration, drift, etc) are what defines population structure (Price, A. et al., 2010). In GWAS, we study the association between certain SNPs to a trait, therefore when we have variation that is connected to a human group, wheather or no there is association with the trait, it Introduces spurious (false) associations between genetic variants and traits (National Academies, 2023; Bryc, K. 2015). This is a current challenge that GWAS tries to address by accounting for it and developing methods that address population structure, family relateness and cryptic relateness (Price, A. et al., 2010).
 
 ## Exploring the Data
 
@@ -224,7 +214,6 @@ var_tree_pca <- (tree_pca_out$sdev)^2
 ```
 
 ::: {.callout-note icon="false" title="Why do we use `prcomp`?"}
-
 prcomp returns a list with class "prcomp" containing the following components:
 
 -   Loadings: rotation
@@ -235,6 +224,7 @@ prcomp returns a list with class "prcomp" containing the following components:
 
     This contains the scores for the PCA analysis. These are the coordinates of the observations (samples) in the new principal component space. Each column corresponds to a principal component, and each row corresponds to an observation.
 :::
+
 \
 
 ### Plot Results
@@ -303,7 +293,6 @@ ggplot(loadings_df, aes(x = reorder(SNP, Loading), y = Loading, fill = Loading))
 ```
 
 ::: {.callout-note icon="false" title="WHich SNPs contribute the most to PC1?"}
-
 :::
 
 \
@@ -357,6 +346,7 @@ ggplot(tree_variance_df, aes(x = PC)) +
 
 
 ```
+
 ## What happens if we would have not realized about the confounding on our data?
 
 ### Omitted Variable Bias
@@ -365,15 +355,15 @@ Reminder: Bias is how long or how far (on average) we are to the "truth".
 
 In this context we are talking about parameters, so...
 
-If $\hat{\theta}$ estimates $\theta$, bias is $E[\hat{\theta}] - \theta$.  
+If $\hat{\theta}$ estimates $\theta$, bias is $E[\hat{\theta}] - \theta$.
 
-When confounding variables are omitted:  
-- Estimates become biased ($E[\hat{\beta} \neq \beta$)  
-- Variance estimates are also distorted  
+When confounding variables are omitted:\
+- Estimates become biased ($E[\hat{\beta} \neq \beta$)\
+- Variance estimates are also distorted
 
 #### Expected Value Rules (Probability Foundations):
 
-For random variables $X,Y$ and constants $a,b$ (aka Linearity of Expectation):  
+For random variables $X,Y$ and constants $a,b$ (aka Linearity of Expectation):
 
 $$
 \begin{aligned}
@@ -383,13 +373,10 @@ E[b] &= b
 \end{aligned}
 $$
 
-
-
-
 #### Proof: OLS Unbiasedness (Correct Model)
 
-**Model**: $y = X\beta + \epsilon$, where $E[\epsilon] = 0$  
-**Estimator**: $\hat{\beta} = (X^TX)^{-1}X^Ty$  
+**Model**: $y = X\beta + \epsilon$, where $E[\epsilon] = 0$\
+**Estimator**: $\hat{\beta} = (X^TX)^{-1}X^Ty$
 
 $$
 \begin{align*}
@@ -400,37 +387,32 @@ E[\hat{\beta}] &= E[(X^TX)^{-1}X^Ty] \\
 \end{align*}
 $$
 
-#### Proof: OLS Bias (Omitted Variable) <- What would happen to us if we don't think about Elevation!!!
+#### Proof: OLS Bias (Omitted Variable) \<- What would happen to us if we don't think about Elevation!!!
 
-**True Model**: $y = X\beta + Z\gamma + \epsilon$  
-**Fitted Model**: $y = X\beta + \epsilon^*$ (omits $Z$)  
+**True Model**: $y = X\beta + Z\gamma + \epsilon$\
+**Fitted Model**: $y = X\beta + \epsilon^*$ (omits $Z$)
 
-$$
+\$\$
 
 \begin{align*}
 \hat{\beta} &= (X^TX)^{-1}X^Ty \\  
 &= (X^TX)^{-1}X^T(X\beta + Z\gamma + \epsilon) \\  
 &= \beta + (X^TX)^{-1}X^TZ\gamma + (X^TX)^{-1}X^T\epsilon  
-\end{align*}
-$$
-Taking expectations: 
+\end{align*} \$\$ Taking expectations:
 
-$$
-\begin{align*}
+\$\$ \begin{align*}
 E[\hat{\beta}] &= \beta + \underbrace{(X^TX)^{-1}X^TZ\gamma}_{\text{Bias term}} \quad \text{(if } X \text{ and } Z \text{ are correlated)} \\  
 E[\hat{\beta}] &\neq \beta \quad 
 \end{align*}
 
-$$
+\$\$
 
 ### References:
 
-- National Academies of Sciences, Engineering, and Medicine. 2023. Using Population Descriptors in Genetics and Genomics Research: A New Framework for an Evolving Field. Washington, DC: The National Academies Press. https://doi.org/10.17226/26902.
-- Bryc, K., Durand, E. Y., Macpherson, J. M., Reich, D., & Mountain, J. L. (2015). The Genetic Ancestry of African Americans, Latinos, and European Americans across the United States. The American Journal of Human Genetics, 96(1), 37-53. https://doi.org/10.1016/j.ajhg.2014.11.010
-- Novembre, J., Johnson, T., Bryc, K., Kutalik, Z., Boyko, A. R., Auton, A., Indap, A., King, K. S., Bergmann, S., Nelson, M. R., Stephens, M., & Bustamante, C. D. (2008). Genes mirror geography within Europe. Nature, 456(7218), 98-101. https://doi.org/10.1038/nature07331
-- Price, A. L., Zaitlen, N. A., Reich, D., & Patterson, N. (2010). New approaches to population stratification in genome-wide association studies. Nature Reviews. Genetics, 11(7), 459–463. https://doi.org/10.1038/nrg2813
-- Simonson, T. S., Yang, Y., Huff, C. D., Yun, H., Qin, G., Witherspoon, D. J., Bai, Z., Lorenzo, F. R., Xing, J., Jorde, L. B., Prchal, J. T., & Ge, R. (2010). Genetic Evidence for High-Altitude Adaptation in Tibet. Science, 329(5987), 72-75. https://doi.org/10.1126/science.1189406
-- Stebbins, G. L. (1950). Variation and Evolution in Plants. Columbia University Press. https://doi.org/10.7312/steb94536
-- Zheng, L., Gaire, N. P., & Shi, P. (2021). High-altitude tree growth responses to climate change across the Hindu Kush Himalaya. Journal of Plant Ecology, 14(5), 829-842. https://doi.org/10.1093/jpe/rtab035
-
-
+-   National Academies of Sciences, Engineering, and Medicine. 2023. Using Population Descriptors in Genetics and Genomics Research: A New Framework for an Evolving Field. Washington, DC: The National Academies Press. https://doi.org/10.17226/26902.
+-   Bryc, K., Durand, E. Y., Macpherson, J. M., Reich, D., & Mountain, J. L. (2015). The Genetic Ancestry of African Americans, Latinos, and European Americans across the United States. The American Journal of Human Genetics, 96(1), 37-53. https://doi.org/10.1016/j.ajhg.2014.11.010
+-   Novembre, J., Johnson, T., Bryc, K., Kutalik, Z., Boyko, A. R., Auton, A., Indap, A., King, K. S., Bergmann, S., Nelson, M. R., Stephens, M., & Bustamante, C. D. (2008). Genes mirror geography within Europe. Nature, 456(7218), 98-101. https://doi.org/10.1038/nature07331
+-   Price, A. L., Zaitlen, N. A., Reich, D., & Patterson, N. (2010). New approaches to population stratification in genome-wide association studies. Nature Reviews. Genetics, 11(7), 459–463. https://doi.org/10.1038/nrg2813
+-   Simonson, T. S., Yang, Y., Huff, C. D., Yun, H., Qin, G., Witherspoon, D. J., Bai, Z., Lorenzo, F. R., Xing, J., Jorde, L. B., Prchal, J. T., & Ge, R. (2010). Genetic Evidence for High-Altitude Adaptation in Tibet. Science, 329(5987), 72-75. https://doi.org/10.1126/science.1189406
+-   Stebbins, G. L. (1950). Variation and Evolution in Plants. Columbia University Press. https://doi.org/10.7312/steb94536
+-   Zheng, L., Gaire, N. P., & Shi, P. (2021). High-altitude tree growth responses to climate change across the Hindu Kush Himalaya. Journal of Plant Ecology, 14(5), 829-842. https://doi.org/10.1093/jpe/rtab035

@@ -1,8 +1,8 @@
-## ----setup, include=FALSE-------------------------------------------------------------------------------------------------------
+## ----setup , include=FALSE-------------------------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 library(tm)
 library(topicmodels)
-library(ldatuning)
+#library(ldatuning)
 library(LDAvis)
 library(tidytext)
 library(dplyr)

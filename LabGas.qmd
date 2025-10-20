@@ -1,0 +1,524 @@
+---
+title: "Final Lab Gas Data Processing"
+author: "Nibia Becerra Santillan"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+categories: [R]
+description: "Pipeline for lab gas fluxes with tidyverse and QC checks."
+date: 2025-04-29
+---
+
+```{r}
+library(forcats)
+library(tidyverse)
+```
+
+# Reading data
+
+```{r}
+fluxData <- read_csv("./results_combo_FINAL_FLUXES_Correct.csv")
+```
+
+# Treatment assignmnet from JarID
+
+```{r}
+fluxData_treatment_three_jars <- fluxData %>%
+  mutate(
+    treatment = case_when(
+      JarID == "BLANK" ~ "BLANK",
+      between(as.numeric(JarID), 1, 3) ~ "90-25",
+      between(as.numeric(JarID), 7, 9) ~ "50-25",
+      between(as.numeric(JarID), 13, 15) ~ "20-25",
+      between(as.numeric(JarID), 19, 21) ~ "90-35",
+      between(as.numeric(JarID), 25, 27) ~ "50-35",
+      between(as.numeric(JarID), 31, 33) ~ "20-35",
+      TRUE ~ NA_character_
+    )) 
+
+fluxData_treatment_six_jars <- fluxData %>%
+  mutate(
+    treatment = case_when(
+      JarID == "BLANK" ~ "BLANK",
+      between(as.numeric(JarID), 1, 6) ~ "90-25",
+      between(as.numeric(JarID), 7, 12) ~ "50-25",
+      between(as.numeric(JarID), 13, 18) ~ "20-25",
+      between(as.numeric(JarID), 19, 24) ~ "90-35",
+      between(as.numeric(JarID), 25, 30) ~ "50-35",
+      between(as.numeric(JarID), 31, 36) ~ "20-35",
+      TRUE ~ NA_character_ 
+    )
+  )
+```
+
+# Fix Dates
+
+```{r}
+
+# Three jars
+flux_three_jars <- fluxData_treatment_three_jars  %>% 
+  mutate(Dateflux = fluxData_treatment_three_jars$Date) %>% 
+  mutate(Date_corr = mdy(Dateflux))
+
+# Six jars
+flux_six_jars <- fluxData_treatment_six_jars %>% 
+  mutate(Dateflux = fluxData_treatment_six_jars$Date) %>% 
+  mutate(Date_corr = mdy(Dateflux))
+
+```
+
+# Means of Fluxes No WET UP
+
+```{r}
+
+NO_WETUP_six <- flux_six_jars%>% 
+  filter(Date_corr %in% c("2024-07-16", "2024-07-17", "2024-07-20", "2024-07-22", "2024-07-23")) %>% 
+  group_by(treatment, Date_corr) %>% 
+  summarize(
+    mean_CO2 = mean(finalC02_flux),
+    sd_CO2 = sd(finalC02_flux),
+    se_CO2 = sd_CO2 / sqrt(n()),  # Standard error for CO2
+    mean_CH4 = mean(finalCH4_flux),
+    sd_CH4 = sd(finalCH4_flux),
+    se_CH4 = sd_CH4 / sqrt(n()),  # Standard error for CH4
+    .groups = "drop"
+  ) %>% 
+    separate(treatment, into = c("WHC", "Temperature"), remove = FALSE) %>%
+  mutate(
+    WHC = factor(WHC, levels = c("20", "50", "90")),
+    Temperature = factor(Temperature, levels = c("25", "35")))
+```
+
+# Colors and lines
+
+```{r}
+custom_colors <- c("20" = "#a6611a", "50" = "#92c5de", "90" = "#0571b0", "NA"= "grey3")
+line_types <- c("25" = "solid", "35" = "dotted", "30" = "longdash", "NA"= "solid")
+```
+
+# Antecedent Data
+
+# CO2
+
+# Timeseries Graph
+
+```{r}
+NO_WETUP_C02_timeseries <- ggplot(NO_WETUP_six, 
+       aes(x = Date_corr, y = mean_CO2, 
+           group = treatment,
+           color = WHC,
+           linetype = Temperature)) +
+  # Add shading for stages
+  geom_rect(aes(xmin = as.Date("2024-07-16") - 0.5, xmax = as.Date("2024-07-17") + 0.5 , ymin =  0, ymax = Inf), 
+            fill = "#e6ecef", color = NA) +
+  geom_rect(aes(xmin = as.Date("2024-07-20") - 0.5, xmax = as.Date("2024-07-23") + 0.5, ymin = 0, ymax = Inf), 
+            fill = "#efe8e6", color = NA) +
+  geom_point() +
+  geom_line()+
+  geom_errorbar(aes(ymin = mean_CO2 - se_CO2, 
+                    ymax = mean_CO2 + se_CO2,
+                    color = WHC,
+                    linetype = Temperature),
+                width = 0.5) +
+  scale_color_manual(values = custom_colors, name = "WHC (%)") +
+  scale_linetype_manual(values = line_types, name = "Temperature") +
+  scale_x_date(breaks = unique(NO_WETUP_six$Date_corr), 
+               date_labels = "%d %b\n%Y") +  # Day as number, abbreviated month, and year below
+  labs(
+    title = "CO₂ Flux Over Time by Treatment",
+    x = "Date", 
+    y = "Mean CO₂ Flux ± SE"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Tilt labels to the side
+  ) +
+  annotate("text", x = as.Date("2024-07-16") + 0.5, y = 2.3e-8, label = "Only moisture", color = "#4d4c4c", fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2024-07-20") + 1.5, y = 2.3e-8, label = "Moisture and Temperature", color = "#4d4c4c", fontface = "bold", , size = 3)
+
+
+NO_WETUP_C02_timeseries
+# ggsave(
+#   filename = "LAB_C02_ActualData.png",
+#   plot = NO_WETUP_C02_timeseries,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",
+#   width = 8,    # adjust width as needed
+#   height = 6,   # adjust height as needed
+#   dpi = 300     # adjust dpi for resolution
+# )
+```
+
+# Mixed Model effect
+
+## Making "Phase"
+
+```{r}
+flux_six_jars  <- flux_six_jars  %>%
+  mutate(phase = ifelse(Date_corr %in% as.Date(c("2024-07-16", "2024-07-17")), "MoistureOnly", "Moisture+Temp")) %>% 
+  mutate(phase = as.factor(phase))
+```
+
+```{r}
+
+library(lme4)
+m4_phase_CO2 <- lmer(finalC02_flux ~ treatment * phase + (1|JarID), 
+                 data = flux_six_jars, 
+                 na.action = na.omit)
+summary(m4_phase_CO2)
+
+
+# Interactions
+library(emmeans)
+
+emm_CO2 <- emmeans(m4_phase_CO2, ~ treatment * phase)
+contrast(emm_CO2, interaction = TRUE, adjust = "sidak")
+
+```
+
+#CH4
+
+# Timeseries graph
+
+```{r}
+# All in the same plot
+NO_WETUP_CH4_timeseries <- ggplot(NO_WETUP_six, 
+       aes(x = Date_corr, y = mean_CH4, 
+           group = treatment,
+           color = WHC,
+           linetype = Temperature)) +
+  geom_rect(aes(xmin = as.Date("2024-07-16") - 0.5, xmax = as.Date("2024-07-17") + 0.5 , ymin =  -1e-9, ymax = Inf), 
+            fill = "#e6ecef", color = NA) +
+  geom_rect(aes(xmin = as.Date("2024-07-20") - 0.5, xmax = as.Date("2024-07-23") + 0.5, ymin = -1e-9, ymax = Inf), 
+            fill = "#efe8e6", color = NA) +
+  geom_point()+
+  geom_line() +
+  geom_errorbar(aes(ymin = mean_CH4 - sd_CH4, 
+                    ymax = mean_CH4 + sd_CH4,
+                    color = WHC,
+                    linetype = Temperature),
+                width = 0.5) +
+  scale_color_manual(values = custom_colors, name = "WHC (%)") +
+  scale_linetype_manual(values = line_types, name = "Temperature") +
+  scale_x_date(breaks = unique(NO_WETUP_six$Date_corr), 
+               date_labels = "%d %b\n%Y") + 
+  labs(
+    title = "CH4 Flux Over Time by Treatment",
+    x = "Date", 
+    y = "Mean CH4 Flux ± SD"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold")
+  )+
+  annotate("text", x = as.Date("2024-07-16") + 0.5, y = 7.5e-9 , label = "Only Moisture", color = "#4d4c4c", fontface = "bold", size = 3.5) +
+  annotate("text", x = as.Date("2024-07-20")+ 1.5 , y = 7.5e-9, label = "Moisture and Temperature", color = "#4d4c4c", fontface = "bold", size = 3.5)
+
+
+NO_WETUP_CH4_timeseries
+
+# ggsave(
+#   filename = "LAB_CH4_ActualData.png",
+#   plot = NO_WETUP_CH4_timeseries,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",
+#   width = 8,    # adjust width as needed
+#   height = 6,   # adjust height as needed
+#   dpi = 300     # adjust dpi for resolution
+# )
+
+```
+
+```{r}
+# Different graphs 
+NO_WETUP_CH4_timeseries_facet <- ggplot(NO_WETUP_six, 
+       aes(x = Date_corr, y = mean_CH4, 
+           group = treatment,
+           color = WHC,
+           linetype = Temperature)) +
+  geom_rect(aes(xmin = as.Date("2024-07-16") - 0.5, xmax = as.Date("2024-07-17") + 0.5 , ymin =  -1e-10, ymax = Inf), 
+            fill = "#e6ecef", color = NA) +
+  geom_rect(aes(xmin = as.Date("2024-07-20") - 0.5, xmax = as.Date("2024-07-23") + 0.5, ymin = -1e-10, ymax = Inf), 
+            fill = "#efe8e6", color = NA) +
+  geom_point() +
+  geom_line()+
+  geom_errorbar(aes(ymin = mean_CH4 - sd_CH4, 
+                    ymax = mean_CH4 + sd_CH4,
+                    color = WHC,
+                    linetype = Temperature),
+                width = 0.5) +
+  scale_color_manual(values = custom_colors, name = "WHC (%)") +
+  scale_linetype_manual(values = line_types, name = "Temperature") +
+  labs(
+    title = "CH4 Flux Over Time by Treatment",
+    x = "Date", 
+    y = "Mean CH4 Flux ± SD"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold")
+  ) +
+  facet_wrap(~ treatment, scales = "free_y")
+NO_WETUP_CH4_timeseries_facet
+
+
+# ggsave(
+#   filename = "LAB_CH4_ActualData_facet.png",
+#   plot = NO_WETUP_CH4_timeseries_facet,
+#   path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",
+#   width = 8,    # adjust width as needed
+#   height = 6,   # adjust height as needed
+#   dpi = 300     # adjust dpi for resolution
+# )
+```
+
+# Mixed Model effect
+
+## Making "Phase"
+
+```{r}
+m4_phase_CH4 <- lmer(finalCH4_flux ~ treatment * phase + (1|JarID), 
+                 data = flux_six_jars, 
+                 na.action = na.omit)
+summary(m4_phase_CH4)
+
+emm_CH4 <- emmeans(m4_phase_CH4, ~ treatment * phase)
+contrast(emm_CH4, interaction = TRUE, adjust = "sidak")
+
+```
+
+# WETUP
+
+## Adding a wet up stage column
+
+```{r}
+
+
+wet_up_cols <- c("PRE_WET", "three_min", "one_hour", "four_hour", "eight_hour", "tweny_four_hour")
+
+#flux_three_jars
+
+WETUP <- flux_three_jars %>%
+  mutate(across(all_of(wet_up_cols), ~ na_if(., "NA"))) %>%
+  rowwise() %>%
+  mutate(
+    WET_UP_stage = {
+      values <- c_across(all_of(wet_up_cols))
+      cols <- wet_up_cols[!is.na(values)]
+      ifelse(length(cols) > 0, str_c(cols, collapse = ", "), NA)
+    }
+  ) %>%
+  ungroup() %>%
+  mutate(
+    WET_UP_stage = factor(
+      WET_UP_stage,
+      levels = wet_up_cols,
+      ordered = TRUE
+    )
+  )
+
+#WETUP
+```
+
+## Filtering
+
+```{r}
+
+WETUP <- WETUP %>% 
+  select(...1, Model, JarID, Time, Label, finalC02_flux, finalCH4_flux, treatment,Dateflux,Date_corr, WET_UP_stage) %>% 
+  filter(Date_corr %in% c("2024-07-29", "2024-07-30")) %>% 
+  separate(treatment, into = c("WHC", "Temperature"), remove = FALSE) %>%
+  mutate(
+    WHC = factor(WHC, levels = c("20", "50", "90")),
+    Temperature = factor(Temperature, levels = c("25", "35", "30")))
+#WETUP_summ
+
+
+WETUP_summ <- WETUP %>% 
+  group_by(treatment, WET_UP_stage) %>%  
+  summarize(
+    mean_CO2 = mean(finalC02_flux),
+    sd_CO2 = sd(finalC02_flux),
+    se_CO2 = sd_CO2 / sqrt(n()),  # Standard error for CO2
+    mean_CH4 = mean(finalCH4_flux),
+    sd_CH4 = sd(finalCH4_flux),
+    se_CH4 = sd_CH4 / sqrt(n()),  # Standard error for CH4
+    .groups = "drop"
+  ) %>% 
+  separate(treatment, into = c("WHC", "Temperature"), remove = FALSE) %>%
+  mutate(
+    WHC = factor(WHC, levels = c("20", "50", "90")),
+    Temperature = factor(Temperature, levels = c("25", "35", "30")))
+#WETUP_summ
+
+```
+
+## CO2 WET UP Graph
+
+```{r}
+# CO2
+
+WETUP_ActualMeasurements_CO2 <- WETUP_summ %>% 
+  ggplot(aes(x = WET_UP_stage, y = mean_CO2,
+             group = treatment,
+             color = WHC,
+             linetype = Temperature)) +
+  geom_point() +
+  geom_line()+
+  geom_errorbar(
+    aes(ymin = mean_CO2 - se_CO2, ymax = mean_CO2 + se_CO2),
+    width = 0.5
+  ) +
+  scale_color_manual(values = custom_colors, name = "WHC (%)") +
+  scale_linetype_manual(values = line_types, name = "Temperature") +
+  scale_x_discrete( labels = c("0 min", "3 min", "1 hr", "4 hr", "8 hr", "24 hr") )+
+  labs(
+    title = "WET-UP CO₂ Flux Over Time by Treatment",
+    x = "Wet-up Stage", 
+    y = "Mean CO₂ Flux ± SE"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold")
+  ) 
+
+WETUP_ActualMeasurements_CO2 
+
+ggsave(
+  filename = "LAB_WETUP_ActualMeasurements_CO2.png",
+  plot = WETUP_ActualMeasurements_CO2,
+  path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",
+  width = 8,    # adjust width as needed
+  height = 6,   # adjust height as needed
+  dpi = 300     # adjust dpi for resolution
+)
+```
+
+# Mixed effects model
+
+```{r}
+
+WETUP_no_PRE <- WETUP %>% 
+  filter(WET_UP_stage != "PRE_WET")
+
+WETUP_CO2 <- lmer(finalC02_flux ~ WHC * Temperature * WET_UP_stage + (1|JarID), 
+                 data =  WETUP_no_PRE, 
+                 na.action = na.omit)
+summary(WETUP_CO2)
+
+WETUP_emm_CO2 <- emmeans(WETUP_CO2, ~ WHC * Temperature * WET_UP_stage)
+contrast(WETUP_emm_CO2, interaction = TRUE, adjust = "sidak")
+
+```
+
+## CH4
+
+```{r}
+WETUP_ActualMeasurements_CH4 <- WETUP_summ %>% 
+  ggplot(aes(x = WET_UP_stage, y = mean_CH4,
+             group = treatment,
+             color = WHC,
+             linetype = Temperature)) +
+  geom_point() +
+  geom_line()+
+  geom_errorbar(
+    aes(ymin = mean_CH4 - se_CH4, ymax = mean_CH4 + se_CH4),
+    width = 0.5
+  ) +
+  scale_color_manual(values = custom_colors, name = "WHC (%)") +
+  scale_linetype_manual(values = line_types, name = "Temperature") +
+  scale_x_discrete( labels = c("0 min", "3 min", "1 hr", "4 hr", "8 hr", "24 hr") )+
+  labs(
+    title = "WET-UP CH₄ Flux Over Time by Treatment",
+    x = "Stage", 
+    y = "Mean CH₄ Flux ± SE"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold")
+  ) 
+
+WETUP_ActualMeasurements_CH4
+
+ggsave(
+  filename = "LAB_WETUP_ActualMeasurements_CH4.png",
+  plot = WETUP_ActualMeasurements_CH4,
+  path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",
+  width = 8,    # adjust width as needed
+  height = 6,   # adjust height as needed
+  dpi = 300     # adjust dpi for resolution
+)
+```
+
+```{r}
+
+WETUP_ActualMeasurements_CH4_facet <- WETUP_summ %>% 
+  ggplot(aes(x = WET_UP_stage, y = mean_CH4,
+             group = treatment,
+             color = WHC,
+             linetype = Temperature)) +
+  geom_point() +
+  geom_line()+
+  geom_errorbar(
+    aes(ymin = mean_CH4 - se_CH4, ymax = mean_CH4 + se_CH4),
+    width = 0.5
+  ) +
+  scale_color_manual(values = custom_colors, name = "WHC (%)") +
+  scale_linetype_manual(values = line_types, name = "Temperature") +
+  scale_x_discrete( labels = c("0 min", "3 min", "1 hr", "4 hr", "8 hr", "24 hr") )+
+  labs(
+    title = "WET-UP CH₄ Flux Over Time by Treatment",
+    x = "Stage", 
+    y = "Mean CH₄ Flux ± SE"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold")
+  ) +
+  facet_wrap(~treatment, scales = "free_y")
+
+WETUP_ActualMeasurements_CH4_facet
+
+ggsave(
+  filename = "LAB_WETUP_ActualMeasurements_CH4_facet.png",
+  plot = WETUP_ActualMeasurements_CH4_facet,
+  path = "~/Desktop/2024-2025/Spring 2025/Honors_Spring/Code/cso066code_BecerraSantillanHonors/TRACEincubation-Figures/Gas",
+  width = 8,    # adjust width as needed
+  height = 6,   # adjust height as needed
+  dpi = 300     # adjust dpi for resolution
+)
+
+```
+
+```{r}
+WETUP_CH4 <- lmer(finalCH4_flux ~ WHC * Temperature * WET_UP_stage + (1|JarID), 
+                 data =  WETUP_no_PRE, 
+                 na.action = na.omit)
+summary(WETUP_CH4)
+
+WETUP_emm_CH4 <- emmeans(WETUP_CH4, ~ WHC * Temperature * WET_UP_stage)
+contrast(WETUP_emm_CH4, interaction = TRUE, adjust = "sidak")
+
+```
