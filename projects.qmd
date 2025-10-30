@@ -24,7 +24,7 @@ editor: visual
     <div class="col-12 col-sm-6 col-lg-4">
       <div class="card h-100 shadow-sm project"
            data-tags="R, tidyverse, lme4, ggplot2">
-        <img src="images/LAB_CO2_ActualData.png" class="card-img-top"
+        <img src="images/LAB_C02_ActualData.png" class="card-img-top"
              alt="CO₂/CH₄ flux time series and model fits" style="object-fit:cover; height:200px;">
         <div class="card-body">
           <h5 class="card-title"><a href="LabGas.html">Laboratory Gas Data Processing</a></h5>
