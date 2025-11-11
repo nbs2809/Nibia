@@ -8,7 +8,7 @@ page-layout: full
 # Nibia Becerra Santillan
 Translating science into actionable solutions  
 \
-[Download My CV](resume.pdf){.btn .btn-light .me-2} [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
+[Download My CV](Becerra Santillan, Nibia - Data Nov25 Resume.pdf){.btn .btn-light .me-2} [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
 :::
 
 ## [About Me]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
