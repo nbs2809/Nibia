@@ -9,6 +9,8 @@ editor: visual
 <div class="container my-4">
   <div id="filters" class="d-flex flex-wrap gap-2 mb-3">
     <button class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="Scientific Modeling">Scientific Modeling</button>
+    <button class="btn btn-sm btn-outline-secondary" data-filter="Data Science">Data Science</button>
     <button class="btn btn-sm btn-outline-secondary" data-filter="R">R</button>
     <button class="btn btn-sm btn-outline-secondary" data-filter="Python">Python</button>
     <button class="btn btn-sm btn-outline-secondary" data-filter="Shiny">Shiny</button>
@@ -20,54 +22,94 @@ editor: visual
   <!-- Projects Grid -->
   <div id="projects-grid" class="row justify-content-center g-4">
 
-    <!-- Lab Gas Processing (Honors Thesis core) -->
+    <!-- Lab Gas Processing (Scientific Modeling) -->
     <div class="col-12 col-sm-6 col-lg-4">
       <div class="card h-100 shadow-sm project"
-           data-tags="R, tidyverse, lme4, ggplot2">
+           data-tags="Scientific Modeling, R, tidyverse, lme4, ggplot2">
         <img src="images/LAB_C02_ActualData.png" class="card-img-top"
              alt="CO₂/CH₄ flux time series and model fits" style="object-fit:cover; height:200px;">
         <div class="card-body">
-          <h5 class="card-title"><a href="LabGas.html">Laboratory Gas Data Processing</a></h5>
+          <h5 class="card-title"><a href="LabGas.qmd">Laboratory Gas Data Processing</a></h5>
           <p class="card-text">Processed 750+ high-freq CO₂/CH₄ runs; Li-COR equations, volume corrections, mixed models, and publication-quality plots.</p>
-          <span class="badge bg-secondary">R</span>
-          <span class="badge bg-secondary">tidyverse</span>
-          <span class="badge bg-secondary">lme4</span>
-          <span class="badge bg-secondary">ggplot2</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Scientific Modeling</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">R</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">tidyverse</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">lme4</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">ggplot2</span>
         </div>
       </div>
     </div>
 
-    <!-- Brazil Shiny Dashboard -->
+    <!-- Brazil Shiny Dashboard (Data Science) -->
     <div class="col-12 col-sm-6 col-lg-4">
       <div class="card h-100 shadow-sm project"
-           data-tags="R, Shiny, ggplot2, Geospatial, sf">
+           data-tags="Data Science, R, Shiny, ggplot2, Geospatial, sf">
         <img src="images/Brazil_Shiny_app.png" class="card-img-top"
              alt="Brazil tree cover loss dashboard preview" style="object-fit:cover; height:200px;">
         <div class="card-body">
-          <h5 class="card-title"><a href="https://fridam.shinyapps.io/bz_treecoverloss/" target="_blank" rel="noopener">Brazil Tree Cover Loss Dashboard</a></h5>
+          <h5 class="card-title">
+            <a href="https://fridam.shinyapps.io/bz_treecoverloss/" target="_blank" rel="noopener">
+              Brazil Tree Cover Loss Dashboard
+            </a>
+          </h5>
           <p class="card-text">Interactive Shiny app exploring two decades of tree cover loss; merged shapefiles with political boundaries; filter by region and year.</p>
-          <span class="badge bg-secondary">R</span>
-          <span class="badge bg-secondary">Shiny</span>
-          <span class="badge bg-secondary">ggplot2</span>
-          <span class="badge bg-secondary">sf</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Data Science</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">R</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Shiny</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">ggplot2</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">sf</span>
         </div>
       </div>
     </div>
 
-    <!-- News Text Mining -->
+    <!-- Clustering (Data Science) -->
     <div class="col-12 col-sm-6 col-lg-4">
       <div class="card h-100 shadow-sm project"
-           data-tags="R, NLP, tidytext, regex">
+           data-tags="Data Science, R, Clustering, Unsupervised, PCA, k-means">
+        <img src="images/Clustering.png" class="card-img-top"
+             alt="Clustering project preview" style="object-fit:cover; height:200px;">
+        <div class="card-body">
+          <h5 class="card-title"><a href="Clustering.qmd">Clustering</a></h5>
+          <p class="card-text">Segmented observations using unsupervised learning; compared clustering approaches and validated results with clear, decision-ready plots.</p>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Data Science</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">R</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Clustering</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Unsupervised</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Difference-in-Differences (Data Science) -->
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 shadow-sm project"
+           data-tags="Data Science, R, Causal Inference, DiD, Econometrics">
+        <img src="images/DiD.png" class="card-img-top"
+             alt="Difference-in-differences project preview" style="object-fit:cover; height:200px;">
+        <div class="card-body">
+          <h5 class="card-title"><a href="DiD_ColombiaVenezuela.qmd">Difference-in-Differences</a></h5>
+          <p class="card-text">Estimated causal impacts using DiD design with transparent assumptions, diagnostics, and interpretable visuals for non-technical audiences.</p>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Data Science</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">R</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">DiD</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Causal Inference</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- News Text Mining (Data Science) -->
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 shadow-sm project"
+           data-tags="Data Science, R, NLP, tidytext, regex, LDA">
         <img src="images/News_LDA.png" class="card-img-top"
              alt="Topic clusters for news corpus" style="object-fit:cover; height:200px;">
         <div class="card-body">
-          <!-- use .html if this is the published file -->
-          <h5 class="card-title"><a href="LDA_thematic_analysis/Report.html">News Text Mining</a></h5>
+          <h5 class="card-title"><a href="LDA_thematic_analysis/Report.qmd">News Text Mining</a></h5>
           <p class="card-text">Built extraction & preprocessing pipeline for 5,061 articles (PDF→text, regex, tokenization) enabling LDA topic modeling and trends.</p>
-          <span class="badge bg-secondary">R</span>
-          <span class="badge bg-secondary">tidytext</span>
-          <span class="badge bg-secondary">regex</span>
-          <span class="badge bg-secondary">LDA</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">Data Science</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">R</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">NLP</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">tidytext</span>
+          <span class="badge rounded-pill text-bg-secondary me-1 mb-1">LDA</span>
         </div>
       </div>
     </div>
@@ -85,18 +127,18 @@ document.addEventListener('DOMContentLoaded', function () {
     btn.addEventListener('click', () => {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const key = btn.dataset.filter.toLowerCase();
+
+      const key = (btn.dataset.filter || 'all').toLowerCase();
 
       cards.forEach(card => {
         const tags = (card.dataset.tags || '').toLowerCase();
         const show = key === 'all' || tags.includes(key);
-        // hide/show the column that contains the card
-        card.closest('.col-12, .col-sm-6, .col-lg-4').style.display = show ? '' : 'none';
+
+        const col = card.parentElement; // column wrapper
+        if (col) col.style.display = show ? '' : 'none';
       });
     });
   });
 });
 </script>
-
 ```
-

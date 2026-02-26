@@ -8,29 +8,22 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: projects.qmd
-        text: Projects Overview
-      - text: Air Data Processing and Visualizations 
+
+      - href: about.qmd
+        text: About
+
+      - text: Work
         menu:
-          - text: Laboratory Gas Data Processing
-            href: LabGas.qmd
-          - text: Field Gas Data Processing
-            href: FieldGas.qmd
-      - text: Data Science Projects
-        menu:
-          - text: Difference in Difference
-            href: DiD_ColombiaVenezuela.qmd
-          - text: LDA thematic analysis
-            href: LDA_thematic_analysis/Report.qmd
-          - text: Clustering
-            href: Clustering.qmd
-      - text: STAT Content Summary
+          - href: projects.qmd
+            text: Projects Overview
+
+      - text: Writing/Notes
         menu:
           - text: Intro to GWAS
             href: Content_Summary.qmd
-          - text: PCA for GWAS 
+          - text: PCA for GWAS
             href: ContentSummary2forreal.qmd
-                
+            
     right:
       - icon: envelope
         href: "mailto:nibiab.work@gmail.com"

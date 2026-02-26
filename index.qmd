@@ -6,7 +6,7 @@ page-layout: full
 
 ::: {.hero style="background:#556B2F; color:white; padding:2rem; text-align:center; border-radius:10px;"}
 # Nibia Becerra Santillan
-Translating science into actionable solutions  
+Climate + data + people
 \
 [Download My CV](Becerra Santillan, Nibia - Data Nov25 Resume.pdf){.btn .btn-light .me-2} [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
 :::

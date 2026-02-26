@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -67,14 +67,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -114,6 +115,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Nibia</span>
     </a>
@@ -129,48 +132,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../projects.html"> 
-<span class="menu-text">Projects Overview</span></a>
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-air-data-processing-and-visualizations" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Air Data Processing and Visualizations</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-work" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Work</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-air-data-processing-and-visualizations">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-work">    
         <li>
-    <a class="dropdown-item" href="../LabGas.html">
- <span class="dropdown-text">Laboratory Gas Data Processing</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../FieldGas.qmd">
- <span class="dropdown-text">Field Gas Data Processing</span></a>
+    <a class="dropdown-item" href="../projects.html">
+ <span class="dropdown-text">Projects Overview</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-data-science-projects" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Data Science Projects</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-writingnotes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Writing/Notes</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-data-science-projects">    
-        <li>
-    <a class="dropdown-item" href="../DiD_ColombiaVenezuela.html">
- <span class="dropdown-text">Difference in Difference</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../LDA_thematic_analysis/Report.html">
- <span class="dropdown-text">LDA thematic analysis</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../Clustering.html">
- <span class="dropdown-text">Clustering</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-stat-content-summary" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">STAT Content Summary</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-stat-content-summary">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-writingnotes">    
         <li>
     <a class="dropdown-item" href="../Content_Summary.html">
  <span class="dropdown-text">Intro to GWAS</span></a>
@@ -247,13 +227,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="loading-packages" class="level3">
 <h3 class="anchored" data-anchor-id="loading-packages">Loading packages</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"pt1.R"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># library(dagitty)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># library(dagitty)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="loading-latinobarometro-data" class="level2">
@@ -261,21 +241,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><br>
 ### Laoding 2020 and 2023 .rdata datasets</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/Latinobarometro_2020_Eng_Rdata_v1_0.rdata"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/Latinobarometro_2020_Eng_Rdata_v1_0.rdata"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/Latinobarometro_2023_Eng_Rdata_v1_0.rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/Latinobarometro_2023_Eng_Rdata_v1_0.rdata"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="loading-2018-.dta-data-set" class="level3">
 <h3 class="anchored" data-anchor-id="loading-2018-.dta-data-set">Loading 2018 .dta data set</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LB2018 <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"data/Latinobarometro_2018_Esp_Stata_v20190303.dta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LB2018 <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"data/Latinobarometro_2018_Esp_Stata_v20190303.dta"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 </section>
 <section id="select-varibles-of-interest" class="level2">
 <h2 class="anchored" data-anchor-id="select-varibles-of-interest">Select Varibles of interest</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>LB2018 <span class="ot">&lt;-</span> LB2018 <span class="sc">%&gt;%</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>LB2018 <span class="ot">&lt;-</span> LB2018 <span class="sc">%&gt;%</span> </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">"NUMINVES"</span>, <span class="st">"IDENPA"</span>, <span class="st">"REG"</span>, <span class="st">"CIUDAD"</span>, <span class="st">"TAMCIUD"</span>, </span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"EDAD"</span>, <span class="st">"SEXO"</span>, <span class="st">"S1"</span>, <span class="st">"S16"</span>, <span class="st">"S26"</span>, <span class="st">"S10"</span>, <span class="st">"P42NC"</span>, <span class="st">"P20STGBSC"</span>, <span class="st">"P22ST"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>LB2020 <span class="ot">&lt;-</span> Latinobarometro_2020_Eng <span class="sc">%&gt;%</span></span>
@@ -283,25 +263,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"edad"</span>, <span class="st">"sexo"</span>, <span class="st">"s1"</span>, <span class="st">"s21"</span>, <span class="st">"s30"</span>, <span class="st">"s16"</span>, <span class="st">"p38n"</span>, <span class="st">"p17stgbs"</span>, <span class="st">"p18st"</span>) </span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>LB2023 <span class="ot">&lt;-</span> Latinobarometro_2023_Eng_v1_0 <span class="sc">%&gt;%</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">"numinves"</span>, <span class="st">"idenpa"</span>, <span class="st">"reg"</span>, <span class="st">"ciudad"</span>, <span class="st">"tamciud"</span>, </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"edad"</span>, <span class="st">"sexo"</span>, <span class="st">"S2"</span>, <span class="st">"S16"</span>, <span class="st">"S24"</span>, <span class="st">"S21B"</span>, <span class="st">"P32INN"</span>, <span class="st">"P15STGBS"</span>, <span class="st">"P16ST"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"edad"</span>, <span class="st">"sexo"</span>, <span class="st">"S2"</span>, <span class="st">"S16"</span>, <span class="st">"S24"</span>, <span class="st">"S21B"</span>, <span class="st">"P32INN"</span>, <span class="st">"P15STGBS"</span>, <span class="st">"P16ST"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="check-the-columns" class="level4">
 <h4 class="anchored" data-anchor-id="check-the-columns">Check the columns</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check column names in each dataset</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2018)  <span class="co"># Inspect column names in LB2018</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check column names in each dataset</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2018)  <span class="co"># Inspect column names in LB2018</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "NUMINVES"  "IDENPA"    "REG"       "CIUDAD"    "TAMCIUD"   "EDAD"     
  [7] "SEXO"      "S1"        "S16"       "S26"       "S10"       "P42NC"    
 [13] "P20STGBSC" "P22ST"    </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2020)  <span class="co"># Inspect column names in LB2020</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2020)  <span class="co"># Inspect column names in LB2020</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "numinves" "idenpa"   "reg"      "ciudad"   "tamciud"  "edad"    
  [7] "sexo"     "s1"       "s21"      "s30"      "s16"      "p38n"    
 [13] "p17stgbs" "p18st"   </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2023)  <span class="co"># Inspect column names in LB2023</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2023)  <span class="co"># Inspect column names in LB2023</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "numinves" "idenpa"   "reg"      "ciudad"   "tamciud"  "edad"    
  [7] "sexo"     "S2"       "S16"      "S24"      "S21B"     "P32INN"  
@@ -312,7 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="change-variable-names" class="level3">
 <h3 class="anchored" data-anchor-id="change-variable-names">Change variable names</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2018) <span class="ot">&lt;-</span> <span class="fu">c</span>( <span class="st">"survey_year"</span>, <span class="st">"country"</span>, <span class="st">"reg"</span>, <span class="st">"city"</span>, <span class="st">"city_size"</span>, <span class="st">"age"</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2018) <span class="ot">&lt;-</span> <span class="fu">c</span>( <span class="st">"survey_year"</span>, <span class="st">"country"</span>, <span class="st">"reg"</span>, <span class="st">"city"</span>, <span class="st">"city_size"</span>, <span class="st">"age"</span>, </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                <span class="st">"sex"</span>, <span class="st">"socialclass_selfAssesment"</span>,<span class="st">"citizen"</span>, </span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                <span class="st">"socialclass_interviewerAssesment"</span>, <span class="st">"educ"</span>,<span class="st">"opinion_immigrants"</span>, <span class="st">"presi_leading"</span>, <span class="st">"left_right"</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -322,7 +302,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(LB2023) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"survey_year"</span>, <span class="st">"country"</span>, <span class="st">"reg"</span>, <span class="st">"city"</span>, <span class="st">"city_size"</span>, <span class="st">"age"</span>, </span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                <span class="st">"sex"</span>,  <span class="st">"socialclass_selfAssesment"</span>,<span class="st">"citizen"</span>, </span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"socialclass_interviewerAssesment"</span>, <span class="st">"educ"</span>,<span class="st">"opinion_immigrants"</span>, <span class="st">"presi_leading"</span>, <span class="st">"left_right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"socialclass_interviewerAssesment"</span>, <span class="st">"educ"</span>,<span class="st">"opinion_immigrants"</span>, <span class="st">"presi_leading"</span>, <span class="st">"left_right"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
@@ -381,13 +361,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
