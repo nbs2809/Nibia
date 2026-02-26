@@ -1,5 +1,7 @@
 ---
-title: "about"
+title: "About Me"
 author: "Nibia"
 editor: visual
 ---
+
+#Coming soon...
