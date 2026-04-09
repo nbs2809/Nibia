@@ -6,9 +6,8 @@ page-layout: full
 
 ::: {.hero style="background:#556B2F; color:white; padding:2rem; text-align:center; border-radius:10px;"}
 # Nibia Becerra Santillan
-Climate + data + people
 \
-[Download My CV](Becerra Santillan, Nibia - Data Nov25 Resume.pdf){.btn .btn-light .me-2} [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
+[Download My CV](CV_Nibia_Apr26_eng.pdf){.btn .btn-light .me-2} [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
 :::
 
 ## [About Me]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
@@ -21,11 +20,9 @@ Climate + data + people
 ::: g-col-8
 ### Nibia Becerra Santillan
 
-**Pronouns:** *she/her*
+**Education:** B.A. Biology and Statistics from Macalester College, Minnesota, USA
 
-**Education:** Macalester College, B.A. Biology and Statistics
-
-**Short Bio:** My passion lies in translating scientific knowledge into actionable solutions with real-world impact. With my strong theoretical foundation and hands-on experience, I aspire to bridge the gap between responsible, community-based science and practical projects that directly benefit people. As a problem solver with a global perspective and a relational approach to finding solutions, I work well in collaborative environments and care deeply about building meaningful connections within a team. I bring a thoughtful and creative approach to challenges and I am excited to share my experiences, support others in their goals, and help create a space where impactful, actionable ideas can grow.
+**Short Bio:** I am a data scientist with an analytics mindset: bilingual (EN/ES), and drawn to contexts where data is scarce but the stakes are high. I've worked across product analytics, scientific research, and regulatory consulting communicating findings to technical and non-technical audiences without losing what matters.
 :::
 :::::
 
