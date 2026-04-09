@@ -12,12 +12,11 @@ toc: false
       <div class="row align-items-center g-4">
         <div class="col-12 col-lg-7">
           <div class="text-uppercase opacity-75" style="letter-spacing:.08em; font-size:.85rem;">
-            climate + people + policy + data = action
+            action driven
           </div>
           <h1 class="display-5 fw-semibold mt-2"> Welcome! I am Nibia </h1>
           <p class="lead mt-3 mb-0">
-            I am a B.A. in Biology and Statistics, passionate about environmental justice and building a career in the intersection of science, policy and implementation. I love working with data, researching and people.
-            
+            One of my biggest passions is accessibility, inclusion, and community building. I bring that passion to my personal and professional life.
             In this section I will highlight some of the experiences that have shaped the way I approach work:
           </p>
         </div>
@@ -43,18 +42,20 @@ toc: false
         </p>
 
         <ul class="mt-3">
-          <li>[1 concrete responsibility]</li>
-          <li>[1 concrete outcome]</li>
-          <li>[1 skills signal: coordination / systems / trust]</li>
+          <li> Managed a $10,000 cross-border project with direct impact on ~80 beneficiaries across Peru, Brazil, and the U.S. Latino community, coordinating partners across 3 countries.
+Built bilingual reporting systems and stakeholder coordination frameworks for funders and community partners.
+</li> 
+          </li> Built bilingual reporting systems and stakeholder coordination frameworks for funders and community partners.
+</li>
         </ul>
         <div class="mt-4">
-        <a href="[optional_link.qmd]" class="btn btn-outline-dark">Read more</a>
+        <a href="[https://www.macalester.edu/global-citizenship/student-opportunities/davis-projects-for-peace/pastprojects-2/]" class="btn btn-outline-dark">Read more</a>
         </div>
       </div>
 
       <!-- IMAGE OR CAROUSEL -->
       <div class="col-12 col-lg-6">
-        <img src="images_about/about_1_Peace_Day_2024.JPG" alt="Highlight 1"
+        <img src="images_about/about_2_Davis_Projects_2024.JPG" alt="Highlight 1"
              class="img-fluid shadow"
              style="width:100%; height:420px; object-fit:cover; border-radius:0;">
       </div>
