@@ -2,6 +2,9 @@
 title: "About"
 page-layout: full
 toc: false
+format:
+  html:
+    bootstrap: 5
 ---
 
 ```{=html}
@@ -16,12 +19,12 @@ toc: false
           </div>
           <h1 class="display-5 fw-semibold mt-2"> Welcome! I am Nibia </h1>
           <p class="lead mt-3 mb-0">
-            One of my biggest passions is accessibility, inclusion, and community building. I bring that passion to my personal and professional life.
+            I am deeply committed to accessibility, inclusion, and community building. I bring this passion to my personal and professional life.
             In this section I will highlight some of the experiences that have shaped the way I approach work:
           </p>
         </div>
         <div class="col-12 col-lg-5">
-          <img src="images_about/Nibia_Profile_Pic.jpg" alt="Nibia"
+          <img src="Nibia_Profile_Pic.jpg" alt="Nibia"
                class="img-fluid shadow"
                style="width:100%; height:320px; object-fit:cover; border-radius:0;">
         </div>
@@ -36,24 +39,30 @@ toc: false
     <div class="row align-items-center g-4">
       <!-- TEXT -->
       <div class="col-12 col-lg-6">
-        <h2 class="h3 fw-semibold"> Davis Projects for Peace: Prosperidad Partners </h2>
-        <p class="mt-3">
-          [Write 4–6 lines about what you did + what it says about how you work.]
-        </p>
+        <h2 class="h3 fw-semibold">Davis Projects for Peace: Prosperidad Partners</h2>
+        <p class="mt-3"> I worked alongside three other Latin American women on a project focusing on economic violence prevention. We partnered with Latinx speakers and NGOs to facilitate culturally relevant content, equipping participants with tools to engage in healthier communication in their relationships, as well as strengthen their financial literacy. We named our workshop series Prosperidad Partners. </p>
 
         <ul class="mt-3">
-          <li> Managed a $10,000 cross-border project with direct impact on ~80 beneficiaries across Peru, Brazil, and the U.S. Latino community, coordinating partners across 3 countries.
-Built bilingual reporting systems and stakeholder coordination frameworks for funders and community partners.
-</li> 
-          </li> Built bilingual reporting systems and stakeholder coordination frameworks for funders and community partners.
-</li>
+        Highlights:
+         <li>Managed a $10,000 cross-border project with direct impact on ~80 beneficiaries across Peru, Brazil, and the U.S. Latino community, coordinating partners across 3 countries.</li>
+          <li>Built bilingual reporting systems and stakeholder coordination frameworks for funders and community partners.</li>
         </ul>
-        <div class="mt-4">
-        <a href="[https://www.macalester.edu/global-citizenship/student-opportunities/davis-projects-for-peace/pastprojects-2/]" class="btn btn-outline-dark">Read more</a>
+
+        <div class="mt-4 d-flex flex-wrap gap-2">
+          <a href="https://www.macalester.edu/global-citizenship/student-opportunities/davis-projects-for-peace/pastprojects-2/" class="btn btn-outline-dark" target="_blank" rel="noopener">
+            Macalester Website
+          </a>
+          <a href="https://drive.google.com/drive/folders/16E482tW-o5A9UFDajeBX_7IrRQ5XCOUl?usp=sharing" class="btn btn-outline-dark" target="_blank" rel="noopener">
+            Final Reports
+          </a>
         </div>
       </div>
+      
+       <ul class="mt-3">
+         
+        </ul>
 
-      <!-- IMAGE OR CAROUSEL -->
+      <!-- IMAGE -->
       <div class="col-12 col-lg-6">
         <img src="images_about/about_2_Davis_Projects_2024.JPG" alt="Highlight 1"
              class="img-fluid shadow"
@@ -69,24 +78,21 @@ Built bilingual reporting systems and stakeholder coordination frameworks for fu
     <div class="row align-items-center g-4">
       <!-- TEXT -->
       <div class="col-12 col-lg-6 order-2 order-lg-1">
-        <h2 class="h3 fw-semibold">Program Asistant at International Student Programs Office </h2>
-        <p class="mt-3">
-          [Write 4–6 lines. Emphasize initiative, budgeting, institutional navigation.]
-        </p>
-            <div class="mt-4">
-            <a href="[optional_link.qmd]" class="btn btn-outline-dark">Read more</a>
-            </div>
+        <h2 class="h3 fw-semibold">Program Assistant at International Student Programs Office</h2>
+        <p class="mt-3">[Write 4–6 lines. Emphasize initiative, budgeting, institutional navigation.]</p>
+        <div class="mt-4">
+          <a href="[optional_link.qmd]" class="btn btn-outline-dark">Read more</a>
+        </div>
       </div>
 
       <!-- CAROUSEL -->
       <div class="col-12 col-lg-6 order-1 order-lg-2">
-        <div id="eventsCarousel" class="carousel slide shadow" data-bs-ride="carousel">
+        <div id="eventsCarousel1" class="carousel slide shadow" data-bs-ride="carousel">
           <div class="carousel-indicators">
-            <button type="button" data-bs-target="#eventsCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#eventsCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#eventsCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#eventsCarousel1" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#eventsCarousel1" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#eventsCarousel1" data-bs-slide-to="2"></button>
           </div>
-
           <div class="carousel-inner">
             <div class="carousel-item active">
               <img src="images_about/about_1_Peace_Day_2024.JPG" class="d-block w-100"
@@ -101,11 +107,10 @@ Built bilingual reporting systems and stakeholder coordination frameworks for fu
                    style="height:420px; object-fit:cover; border-radius:0;" alt="Event 3">
             </div>
           </div>
-
-          <button class="carousel-control-prev" type="button" data-bs-target="#eventsCarousel" data-bs-slide="prev">
+          <button class="carousel-control-prev" type="button" data-bs-target="#eventsCarousel1" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
           </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#eventsCarousel" data-bs-slide="next">
+          <button class="carousel-control-next" type="button" data-bs-target="#eventsCarousel1" data-bs-slide="next">
             <span class="carousel-control-next-icon"></span>
           </button>
         </div>
@@ -118,14 +123,10 @@ Built bilingual reporting systems and stakeholder coordination frameworks for fu
 <section class="container-fluid px-0">
   <div class="container py-5">
     <div class="row align-items-center g-4">
-
       <!-- TEXT -->
       <div class="col-12 col-md-6 pe-md-5">
-        <h2 class="h3 fw-semibold"> Event organizing - Across multiple years </h2>
-        <p class="mt-3">
-          [Your 4–6 lines here...]
-        </p>
-
+        <h2 class="h3 fw-semibold">Event organizing - Across multiple years</h2>
+        <p class="mt-3">[Your 4–6 lines here...]</p>
         <div class="mt-4">
           <a href="YOUR_READMORE.qmd" class="btn btn-outline-dark">Read more</a>
         </div>
@@ -137,7 +138,6 @@ Built bilingual reporting systems and stakeholder coordination frameworks for fu
              class="img-fluid shadow"
              style="width:100%; height:420px; object-fit:cover; border-radius:0;">
       </div>
-
     </div>
   </div>
 </section>
@@ -148,24 +148,21 @@ Built bilingual reporting systems and stakeholder coordination frameworks for fu
     <div class="row align-items-center g-4">
       <!-- TEXT -->
       <div class="col-12 col-lg-6 order-2 order-lg-1">
-        <h2 class="h3 fw-semibold"> Fundraiser Coordinator - UWC Peru (Voluntering) </h2>
-        <p class="mt-3">
-          [Write 4–6 lines. Emphasize initiative, budgeting, institutional navigation.]
-        </p>
-            <div class="mt-4">
-            <a href="[optional_link.qmd]" class="btn btn-outline-dark">Read more</a>
-            </div>
+        <h2 class="h3 fw-semibold">Fundraiser Coordinator - UWC Peru (Volunteering)</h2>
+        <p class="mt-3">[Write 4–6 lines. Emphasize initiative, budgeting, institutional navigation.]</p>
+        <div class="mt-4">
+          <a href="[optional_link.qmd]" class="btn btn-outline-dark">Read more</a>
+        </div>
       </div>
 
       <!-- CAROUSEL -->
       <div class="col-12 col-lg-6 order-1 order-lg-2">
-        <div id="eventsCarousel" class="carousel slide shadow" data-bs-ride="carousel">
+        <div id="eventsCarousel2" class="carousel slide shadow" data-bs-ride="carousel">
           <div class="carousel-indicators">
-            <button type="button" data-bs-target="#eventsCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#eventsCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#eventsCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#eventsCarousel2" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#eventsCarousel2" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#eventsCarousel2" data-bs-slide-to="2"></button>
           </div>
-
           <div class="carousel-inner">
             <div class="carousel-item active">
               <img src="images_about/about_1_Peace_Day_2024.JPG" class="d-block w-100"
@@ -180,11 +177,10 @@ Built bilingual reporting systems and stakeholder coordination frameworks for fu
                    style="height:420px; object-fit:cover; border-radius:0;" alt="Event 3">
             </div>
           </div>
-
-          <button class="carousel-control-prev" type="button" data-bs-target="#eventsCarousel" data-bs-slide="prev">
+          <button class="carousel-control-prev" type="button" data-bs-target="#eventsCarousel2" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
           </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#eventsCarousel" data-bs-slide="next">
+          <button class="carousel-control-next" type="button" data-bs-target="#eventsCarousel2" data-bs-slide="next">
             <span class="carousel-control-next-icon"></span>
           </button>
         </div>
