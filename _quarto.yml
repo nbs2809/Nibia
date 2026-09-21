@@ -8,7 +8,6 @@ website:
     left:
       - href: index.qmd
         text: Home
-
       - href: about.qmd
         text: About
 
@@ -16,14 +15,6 @@ website:
         menu:
           - href: projects.qmd
             text: Projects Overview
-
-      - text: Writing/Notes
-        menu:
-          - text: Intro to GWAS
-            href: Content_Summary.qmd
-          - text: PCA for GWAS
-            href: ContentSummary2forreal.qmd
-            
     right:
       - icon: envelope
         href: "mailto:nibiab.work@gmail.com"
