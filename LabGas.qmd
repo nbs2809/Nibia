@@ -4,7 +4,6 @@ author: "Nibia Becerra Santillan"
 format:
   html:
     toc: true
-    code-fold: true
 execute:
   echo: true
   warning: false
