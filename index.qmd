@@ -11,7 +11,7 @@ page-layout: full
 [Contact Me](mailto:nibiab.work@gmail.com){.btn .btn-light}
 :::
 
-## [About me /Sobre mi]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
+## [About me / Sobre mi]{style="color: #556B2F; font-family: monospace; font-weight: bold; font-size: 20px;"}
 
 ::::: grid
 ::: g-col-4
