@@ -7,9 +7,9 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Inicio/Home
+        text: Inicio / Home
       - href: about.qmd
-        text: Sobre mi/About
+        text: Sobre mi / About
 
       - text: Projects/Proyectos
         menu:

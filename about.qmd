@@ -16,9 +16,9 @@ format:
       <div class="row align-items-center g-4">
         <div class="col-12 col-lg-7">
           <div class="text-uppercase opacity-75" style="letter-spacing:.08em; font-size:.85rem;">
-            action driven
+            amo los proyectos
           </div>
-          <h1 class="display-5 fw-semibold mt-2"> Welcome! I am Nibia </h1>
+          <h1 class="display-5 fw-semibold mt-2"> Hola, soy Nibia </h1>
           <p class="lead mt-3 mb-0">
             I am deeply committed to accessibility, inclusion, and community building. I bring this passion to my personal and professional life.
             In this section I will highlight some of the experiences that have shaped the way I approach work:
@@ -103,10 +103,6 @@ format:
             <div class="carousel-item active">
               <img src="images_about/about_1_Peace_Day_2024.JPG" class="d-block w-100"
                    style="height:420px; object-fit:cover; border-radius:0;" alt="Event 1">
-            </div>
-            <div class="carousel-item">
-              <img src="images_about/about_2_Davis_Projects_2024.jpg" class="d-block w-100"
-                   style="height:420px; object-fit:cover; border-radius:0;" alt="Event 2">
             </div>
             <div class="carousel-item">
               <img src="images_about/about_3_Peace_Day_2023_attendees.jpg" class="d-block w-100"

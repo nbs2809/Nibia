@@ -1,0 +1,34 @@
+---
+title: "Exploratory_Project_Metropolitano_Areas_Verdes"
+author: Nibia Becerra Santillan
+format: html
+---
+# Reporte Exploratorio
+
+Este reporte está basado en observaciones al utilizar el servicio de transporte público Corredor Metropolitano de Lima, Perú. Existe una diferencia observable entre el diseño, mantenimiento y beneficios a lo largo de la ruta desde Estación Chimpu Ocllo (Lima Norte) hasta Estación Matellini (Lima Sur). 
+
+## Metodologia
+
+En este proyecto exploratorio se utilizó Copernicus Browser con imagenes Sentinel-2 L2A y el Índice de Vegetación de Diferencia Normalizada (NDVI, por sus siglas en inglés) para extraer datos sobre la calidad de las áreas verdes que son parte de los proyectos. Estas areas verdes fueron divididas en dos categorias segun su función urbana:
+1.  Parque Entrada: Corresponde a los espacios públicos verdes de mayor envergadura ubicados en el entorno inmediato de las estaciones elegidas. Esta categoría abarca tanto las zonas consolidadas (con vegetación activa) como aquellas áreas proyectadas que actualmente se encuentran no consolidadas o en estado de degradación. 
+2. Franjas Verdes: Comprende los componentes longitudinales de infraestructura verde dispuestos a lo largo del corredor de transporte, localizados específicamente en el separador central (mediana) o en los márgenes laterales de los carriles segregados próximos a las estaciones.
+
+# Procesamiento
+```{r, echo=FALSE}
+library(tidyverse)
+```
+```{r, echo=FALSE}
+areas_verdes <- read_csv("../Metropolitano/GIS-Copernicus_Metropolitano.csv")
+head(areas_verdes)
+```
+```{r}
+
+```
+
+
+
+
+
+
+
+
