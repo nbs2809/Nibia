@@ -1,0 +1,13 @@
+Lat,Lon,Distrito,Tipo,Promedio_NDVI
+-11.89488452,-77.03654051,Carabayllo,Franja Verde,0.1075
+-11.89488452,-77.03654051,Carabayllo,Parque Entrada,0.16046666666666667
+-11.97944201,-77.05933392,Independencia,Franja Verde,0.1316
+-11.97944201,-77.05933392,Independencia,Parque Entrada,0.2058
+-12.05806829,-77.04064965,Cercado de Lima,Franja Verde,0.07473333333333333
+-12.05806829,-77.04064965,Cercado de Lima,Parque Entrada,0.5031
+-12.09327479,-77.02321663,San Isidro,Franja Verde,0.2178
+-12.09327479,-77.02321663,San Isidro,Parque Entrada,0.6538333333333334
+-12.13706248,-77.01839805,Barranco/Miraflores,Franja Verde,0.12136666666666666
+-12.13706248,-77.01839805,Barranco/Miraflores,Parque Entrada,0.2908
+-12.17780011,-77.01091737,Chorrillos,Franja Verde,0.42660000000000003
+-12.17780011,-77.01091737,Chorrillos,Parque Entrada,0.2779

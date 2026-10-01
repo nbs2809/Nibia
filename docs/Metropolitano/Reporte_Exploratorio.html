@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -40,6 +74,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -91,11 +128,11 @@ ul.task-list li input[type="checkbox"] {
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="../index.html"> 
-<span class="menu-text">Inicio Home</span></a>
+<span class="menu-text">Inicio / Home</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../about.html"> 
-<span class="menu-text">Sobre mi About</span></a>
+<span class="menu-text">Sobre mi / About</span></a>
   </li>  
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-projectsproyectos" role="link" data-bs-toggle="dropdown" aria-expanded="false">
@@ -141,6 +178,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#metodologia" id="toc-metodologia" class="nav-link" data-scroll-target="#metodologia">Metodologia</a></li>
   </ul></li>
   <li><a href="#procesamiento" id="toc-procesamiento" class="nav-link" data-scroll-target="#procesamiento">Procesamiento</a></li>
+  <li><a href="#reference-pictures-from-google-earth" id="toc-reference-pictures-from-google-earth" class="nav-link" data-scroll-target="#reference-pictures-from-google-earth">Reference pictures from Google Earth</a></li>
   </ul>
 </nav>
     </div>
@@ -209,15 +247,210 @@ date (1): Fecha
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 7
-    Lat   Lon   NDVI Estación     Tipo           Fecha      Distrito  
-  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;          &lt;date&gt;     &lt;chr&gt;     
-1 -11.9 -77.0 0.107  Chimpu Ocllo Parque Entrada 2026-06-13 Carabayllo
-2 -11.9 -77.0 0.209  Chimpu Ocllo Parque Entrada 2026-06-13 Carabayllo
-3 -11.9 -77.0 0.165  Chimpu Ocllo Parque Entrada 2026-06-13 Carabayllo
-4 -11.9 -77.0 0.055  Chimpu Ocllo Franja verde   2026-06-13 Carabayllo
-5 -11.9 -77.0 0.0658 Chimpu Ocllo Franja Verde   2026-06-13 Carabayllo
-6 -11.9 -77.0 0.202  Chimpu Ocllo Franja Verde   2026-06-13 Carabayllo</code></pre>
+<pre><code># A tibble: 36 × 7
+     Lat   Lon   NDVI Estación     Tipo           Fecha      Distrito     
+   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;          &lt;date&gt;     &lt;chr&gt;        
+ 1 -11.9 -77.0 0.107  Chimpu Ocllo Parque Entrada 2026-06-13 Carabayllo   
+ 2 -11.9 -77.0 0.209  Chimpu Ocllo Parque Entrada 2026-06-13 Carabayllo   
+ 3 -11.9 -77.0 0.165  Chimpu Ocllo Parque Entrada 2026-06-13 Carabayllo   
+ 4 -11.9 -77.0 0.055  Chimpu Ocllo Franja Verde   2026-06-13 Carabayllo   
+ 5 -11.9 -77.0 0.0658 Chimpu Ocllo Franja Verde   2026-06-13 Carabayllo   
+ 6 -11.9 -77.0 0.202  Chimpu Ocllo Franja Verde   2026-06-13 Carabayllo   
+ 7 -12.0 -77.1 0.0516 Naranjal     Parque Entrada 2026-06-13 Independencia
+ 8 -12.0 -77.1 0.482  Naranjal     Parque Entrada 2026-06-13 Independencia
+ 9 -12.0 -77.1 0.0839 Naranjal     Parque Entrada 2026-06-13 Independencia
+10 -12.0 -77.1 0.149  Naranjal     Franja Verde   2026-06-13 Independencia
+# ℹ 26 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Yo recolecté los datos y corregí cualquier incosistencia antes de guardar el archivo csv.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Orden de los distritos de Norte a Sur</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>distritos_norte_a_sur <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Carabayllo"</span>,<span class="st">"Independencia"</span>,<span class="st">"Cercado de Lima"</span>, <span class="st">"San Isidro"</span>,<span class="st">"Barranco/Miraflores"</span>, <span class="st">"Chorrillos"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Promedios </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Promedios_estaciones_general &lt;- areas_verdes |&gt; </span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(Distrito) |&gt; </span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   summarize(Promedio_NDVI = mean(NDVI)) |&gt; </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(Distrito = factor(Distrito, levels = distritos_norte_a_sur)) |&gt; </span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(Distrito)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># kable(Promedios_estaciones_general)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>Promedios_estaciones_tipo <span class="ot">&lt;-</span> areas_verdes <span class="sc">|&gt;</span> </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Lat,Lon,Distrito, Tipo) <span class="sc">|&gt;</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Promedio_NDVI =</span> <span class="fu">mean</span>(NDVI), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Distrito =</span> <span class="fu">factor</span>(Distrito, <span class="at">levels =</span> distritos_norte_a_sur)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Distrito) </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(Promedios_estaciones_tipo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Lat</th>
+<th style="text-align: right;">Lon</th>
+<th style="text-align: left;">Distrito</th>
+<th style="text-align: left;">Tipo</th>
+<th style="text-align: right;">Promedio_NDVI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">-11.90</td>
+<td style="text-align: right;">-77.04</td>
+<td style="text-align: left;">Carabayllo</td>
+<td style="text-align: left;">Franja Verde</td>
+<td style="text-align: right;">0.1075000</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-11.90</td>
+<td style="text-align: right;">-77.04</td>
+<td style="text-align: left;">Carabayllo</td>
+<td style="text-align: left;">Parque Entrada</td>
+<td style="text-align: right;">0.1604667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-11.99</td>
+<td style="text-align: right;">-77.06</td>
+<td style="text-align: left;">Independencia</td>
+<td style="text-align: left;">Franja Verde</td>
+<td style="text-align: right;">0.1316000</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-11.98</td>
+<td style="text-align: right;">-77.06</td>
+<td style="text-align: left;">Independencia</td>
+<td style="text-align: left;">Parque Entrada</td>
+<td style="text-align: right;">0.2058000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-12.06</td>
+<td style="text-align: right;">-77.04</td>
+<td style="text-align: left;">Cercado de Lima</td>
+<td style="text-align: left;">Franja Verde</td>
+<td style="text-align: right;">0.0747333</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-12.06</td>
+<td style="text-align: right;">-77.04</td>
+<td style="text-align: left;">Cercado de Lima</td>
+<td style="text-align: left;">Parque Entrada</td>
+<td style="text-align: right;">0.5031000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-12.09</td>
+<td style="text-align: right;">-77.02</td>
+<td style="text-align: left;">San Isidro</td>
+<td style="text-align: left;">Franja Verde</td>
+<td style="text-align: right;">0.2178000</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-12.09</td>
+<td style="text-align: right;">-77.02</td>
+<td style="text-align: left;">San Isidro</td>
+<td style="text-align: left;">Parque Entrada</td>
+<td style="text-align: right;">0.6538333</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-12.14</td>
+<td style="text-align: right;">-77.02</td>
+<td style="text-align: left;">Barranco/Miraflores</td>
+<td style="text-align: left;">Franja Verde</td>
+<td style="text-align: right;">0.1213667</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-12.14</td>
+<td style="text-align: right;">-77.02</td>
+<td style="text-align: left;">Barranco/Miraflores</td>
+<td style="text-align: left;">Parque Entrada</td>
+<td style="text-align: right;">0.2908000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-12.18</td>
+<td style="text-align: right;">-77.01</td>
+<td style="text-align: left;">Chorrillos</td>
+<td style="text-align: left;">Franja Verde</td>
+<td style="text-align: right;">0.4266000</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-12.18</td>
+<td style="text-align: right;">-77.01</td>
+<td style="text-align: left;">Chorrillos</td>
+<td style="text-align: left;">Parque Entrada</td>
+<td style="text-align: right;">0.2779000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(Promedios_estaciones_tipo, <span class="st">"Promedios_estaciones_tipo.csv"</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Promedios_estaciones_tipo <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Distrito, <span class="at">y =</span> Promedio_NDVI, <span class="at">fill =</span> Tipo)) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Distritos (De norte a sur)"</span>, </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Promedio NDVI (Índice de Vegetación de Diferencia Normalizada)"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Tipo de área verde"</span>) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"E"</span>, <span class="at">end =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(    <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.18</span>, <span class="fl">0.80</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
+3.5.0.
+ℹ Please use the `legend.position.inside` argument of `theme()` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="Reporte_Exploratorio_files/figure-html/unnamed-chunk-4-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="Reporte_Exploratorio_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="reference-pictures-from-google-earth" class="level1">
+<h1>Reference pictures from Google Earth</h1>
+<div>
+
+</div>
+<div id="Estaciones" class="Google Earth Web Screenshots quarto-layout-panel" data-layout-ncol="3" style="Yellow">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Chimpu_Ocllo_FranjaVerde.png" class="img-fluid" alt="Franja Verde en estación Chimpu Ocllo, Carabayllo"> {group=“my-group”}</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Chimpu_Ocllo_ParqueEntrada.png" class="img-fluid" alt="Parque de Entrada en estación Chimpu Ocllo, Carabayllo"> {group=“my-group”}</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Naranjal_ParqueEntrada.png" class="img-fluid" alt="Parque de Entrada en estación Naranjal, Independencia"> {group=“my-group”}</p>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Naranjal_FranjaVerde.png" class="img-fluid" alt="Franja Verde en estación Naranjal, Independencia"> {group=“my-group”}</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Central_FranjaVerde.png" class="img-fluid" alt="Franja Verde en estación Central, Cercado de Lima"> {group=“my-group”}</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Central_ParqueEntrada.png" class="img-fluid" alt="Parque de Entrada en estación Central, Cercado de Lima"> {group=“my-group”}</p>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/JavierPrado_ParqueyFranja.png" class="img-fluid" alt="Parque de Entrada y Franja Verde en estación Javier Prado, San Isidro"> {group=“my-group”}</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Flores_ParqueyFranja.png" class="img-fluid" alt="Parque de Entrada y Franja Verde en estación Las Flores entre Miraflores y Barranco"> {group=“my-group”}</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><img src="GoogleEarthPhotos/Matellini_ParqueyFranja.png" class="img-fluid" alt="Parque de Entrada y Franja Verde en estación Matellini, Chorrillos"> {group=“my-group”}</p>
+</div>
 </div>
 </div>
 
@@ -646,6 +879,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","selector":".lightbox","openEffect":"zoom","loop":false});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
