@@ -89,6 +89,4 @@ Promedios_estaciones_tipo |>
 *![Parque de Entrada y Franja Verde en estación Matellini, Chorrillos](GoogleEarthPhotos/Matellini_ParqueyFranja.png) Parque de Entrada y Franja Verde en estación Matellini, Chorrillos*
 :::
 
-```{r}
 
-```
