@@ -7,7 +7,7 @@ page-layout: full
 ::: {.hero style="background:#556B2F; color:white; padding:2rem; text-align:center; border-radius:10px;"}
 # Nibia Becerra Santillan
 
-[Mi CV](CV_Nibia_Apr26_eng.pdf){.btn .btn-light .me-2}
+[Mi CV](CV_Nibia_Becerra_Oct26.pdf){.btn .btn-light .me-2}
 [Contactame!](mailto:nibiab.work@gmail.com){.btn .btn-light}
 :::
 

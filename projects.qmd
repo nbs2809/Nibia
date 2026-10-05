@@ -9,14 +9,11 @@ editor: visual
 <div class="container my-4">
   <div id="filters" class="d-flex flex-wrap gap-2 mb-3">
     <button class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
-    <button class="btn btn-sm btn-outline-secondary" data-filter="Scientific Modeling">Scientific Modeling</button>
-    <button class="btn btn-sm btn-outline-secondary" data-filter="Data Science">Data Science</button>
     <button class="btn btn-sm btn-outline-secondary" data-filter="R">R</button>
-    <button class="btn btn-sm btn-outline-secondary" data-filter="Python">Python</button>
     <button class="btn btn-sm btn-outline-secondary" data-filter="Shiny">Shiny</button>
-    <button class="btn btn-sm btn-outline-secondary" data-filter="SQL">SQL</button>
-    <button class="btn btn-sm btn-outline-secondary" data-filter="Geospatial">Geospatial</button>
     <button class="btn btn-sm btn-outline-secondary" data-filter="NLP">NLP</button>
+        <button class="btn btn-sm btn-outline-secondary" data-filter="Surveys">Surveys</button>
+
   </div>
 
   <!-- Projects Grid -->
@@ -95,8 +92,7 @@ editor: visual
         </div>
       </div>
     </div>
-
-    <!-- News Text Mining (Data Science) -->
+      <!-- News Text Mining (Data Science) -->
     <div class="col-12 col-sm-6 col-lg-4">
       <div class="card h-100 shadow-sm project"
            data-tags="Data Science, R, NLP, tidytext, regex, LDA">
@@ -113,7 +109,6 @@ editor: visual
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
